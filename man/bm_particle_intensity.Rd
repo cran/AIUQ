@@ -4,7 +4,7 @@
 \alias{bm_particle_intensity}
 \title{Simulate 2D particle trajectory follows Brownian Motion}
 \usage{
-bm_particle_intensity(pos0, M, len_t, mu, sigma)
+bm_particle_intensity(pos0, M, len_t, sigma)
 }
 \arguments{
 \item{pos0}{initial position for \code{M} particles, matrix with dimension M by 2}
@@ -12,8 +12,6 @@ bm_particle_intensity(pos0, M, len_t, mu, sigma)
 \item{M}{number of particles}
 
 \item{len_t}{number of time steps}
-
-\item{mu}{mean velocity of the drift}
 
 \item{sigma}{distance moved per time step}
 }
@@ -30,11 +28,9 @@ particles.
 library(AIUQ)
 M = 10
 len_t = 50
-mu = 0
 sigma = 0.5
 pos0 = matrix(100/8+0.75*100*runif(M*2),nrow=M,ncol=2)
-
-pos = bm_particle_intensity(pos0=pos0,M=M,len_t=len_t,mu=mu,sigma=sigma)
+pos = bm_particle_intensity(pos0=pos0,M=M,len_t=len_t,sigma=sigma)
 }
 \author{
 \packageAuthor{AIUQ}

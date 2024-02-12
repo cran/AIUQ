@@ -4,22 +4,29 @@
 \alias{intensity_format_transform}
 \title{Transform intensity profile into SS_T matrix}
 \usage{
-intensity_format_transform(intensity, intensity_str)
+intensity_format_transform(intensity, intensity_str, square = FALSE, sz = NA)
 }
 \arguments{
 \item{intensity}{intensity profile, array or matrix}
 
 \item{intensity_str}{structure of the original intensity
-profile, options from ('SST_array','S_ST_mat','T_SS_mat')}
+profile, options from ('SST_array','T_SS_mat','SS_T_mat','S_ST_mat')}
+
+\item{square}{a logical evaluating to TRUE or FALSE indicating whether or not
+to crop each frame into a square such that frame size in x direction equals
+frame size in y direction with \code{sz_x=sz_y}}
+
+\item{sz}{frame size of each frame. A vector of length 2 with frame size in
+y/(row) direction, and frame size in x/(column) direction, with default \code{NA}.}
 }
 \value{
 A matrix of transformed intensity profile.
 }
 \description{
-Transform intensity profile with different formats, ('SST_array',S_ST_mat',
-'T_SS_mat'), space by space by time array,space by (space by time) matrix,
-or time by (space by space) matrix, into SS_T matrix. In addition, crop
-each frame into a square image with odd frame size.
+Transform intensity profile with different formats, ('SST_array','T_SS_mat',
+'SS_T_mat','S_ST_mat'), space by space by time array, time by (space by space) matrix,
+(space by space) by time matrix, or space by (space by time) matrix, into
+'SS_T_mat'. In addition, crop each frame with odd frame size.
 }
 \examples{
 library(AIUQ)
@@ -28,7 +35,7 @@ library(AIUQ)
 #             frame contains number 1-9
 # -------------------------------------------------
 (m <- matrix(rep(1:9,4),4,9,byrow=TRUE))
-intensity_format_transform(m,intensity_str="T_SS_mat")
+intensity_format_transform(m,intensity_str="T_SS_mat",sz=c(4,9))
 
 # -------------------------------------------------
 # Example 2: Transform SST_array into SS_T_mat, each

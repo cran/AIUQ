@@ -1,15 +1,15 @@
-#' Scattering analysis of microscopy
+#' Scattering analysis of microscopy for anisotropic processes
 #'
 #' @description
-#' Fast parameter estimation in scattering analysis of microscopy, using either
-#' AIUQ or DDM method.
+#' Fast parameter estimation in scattering analysis of microscopy for anisotropic
+#' processes, using AIUQ method.
 #'
 #' @param intensity intensity profile. See 'Details'.
 #' @param intensity_str structure of the intensity profile, options from
 #' ('SST_array','S_ST_mat','T_SS_mat'). See 'Details'.
-#' @param pxsz size of one pixel in unit of micron, 1 for simulated data
 #' @param sz frame size of the intensity profile in x and y directions,
 #' number of pixels contained in each frame equals sz_x by sz_y.
+#' @param pxsz size of one pixel in unit of micron, 1 for simulated data
 #' @param mindt minimum lag time, 1 for simulated data
 #' @param AIUQ_thr threshold for wave number selection, numeric vector of two
 #' elements with values between 0 and 1. See 'Details'.
@@ -34,26 +34,17 @@
 #' @param msd_truth true MSD or reference MSD value.
 #' @param method methods for parameter estimation, options from ('AIUQ', 'DDM').
 #' @param index_q_AIUQ index range for wave number when using AIUQ method. See 'Details'.
-#' @param index_q_DDM index range for wave number when using DDM method. See 'Details'.
 #' @param message_out a logical evaluating to TRUE or FALSE indicating whether
 #' or not to output the message.
 #' @param square a logical evaluating to TRUE or FALSE indicating whether or not
 #' to crop the original intensity profile into square image.
-#' @param output_dqt a logical evaluating to TRUE or FALSE indicating whether or
-#' not to compute observed dynamic image structure function(Dqt).
-#' @param output_isf a logical evaluating to TRUE or FALSE indicating whether or
-#' not to compute empirical intermediate scattering function(ISF).
-#' @param output_modeled_isf a logical evaluating to TRUE or FALSE indicating
-#' whether or not to compute modeled intermediate scattering function(ISF).
-#' @param output_modeled_dqt a logical evaluating to TRUE or FALSE indicating
-#' whether or not to compute modeled dynamic image structure function(Dqt).
 #'
 #' @details
-#' For simulated data using \code{simulation} in AIUQ package, \code{intensity}
-#' will be automatically extracted from \code{simulation} class.
+#' For simulated data using \code{aniso_simulation} in AIUQ package, \code{intensity}
+#' will be automatically extracted from \code{aniso_simulation} class.
 #'
 #' By default \code{intensity_str} is set to 'T_SS_mat', a time by space\eqn{\times}{%\times}space
-#' matrix, which is the structure of intensity profile obtained from \code{simulation}
+#' matrix, which is the structure of intensity profile obtained from \code{aniso_simulation}
 #' class. For \code{intensity_str='SST_array'} , input intensity profile should be a
 #' space by space by time array, which is the structure from loading a tif file.
 #' For \code{intensity_str='S_ST_mat'}, input intensity profile should be a
@@ -74,11 +65,10 @@
 #' \code{simulation} class for simulated data using \code{simulation} in AIUQ
 #' package.
 #'
-#' By default, using all wave vectors from complete q ring for both \code{AIUQ}
-#' and \code{DDM} method, unless user defined index range through \code{index_q_AIUQ}
-#' or \code{index_q_DDM}.
+#' By default, using all wave vectors from complete q ring for both \code{AIUQ},
+#' unless user defined index range through \code{index_q_AIUQ}.
 #'
-#' @return Returns an S4 object of class \code{SAM}.
+#' @return Returns an S4 object of class \code{aniso_SAM}.
 #' @export
 #' @author \packageAuthor{AIUQ}
 #' @references
@@ -97,19 +87,21 @@
 #' @examples
 #' library(AIUQ)
 #' # Example 1: Estimation for simulated data
-#' sim_bm = simulation(len_t=100,sz=100,sigma_bm=0.5)
-#' show(sim_bm)
-#' sam = SAM(sim_object = sim_bm)
-#' show(sam)
-SAM <- function(intensity=NA,intensity_str="T_SS_mat",pxsz=1,sz=c(NA,NA),mindt=1,
-                AIUQ_thr=c(1,1),model_name='BM',sigma_0_2_ini=NaN,param_initial=NA,
-                num_optim=1,msd_fn=NA,msd_grad_fn=NA,num_param=NA,
-                uncertainty=FALSE,M=50,sim_object=NA, msd_truth=NA,
-                method="AIUQ",index_q_AIUQ=NA, index_q_DDM=NA,message_out=TRUE,
-                square=FALSE, output_dqt=FALSE, output_isf=FALSE,
-                output_modeled_isf=FALSE,output_modeled_dqt=FALSE){
+#' set.seed(1)
+#' aniso_sim = aniso_simulation(sz=100,len_t=100, model_name="BM",M=100,sigma_bm=c(0.5,0.3))
+#' show(aniso_sim)
+#' plot_traj(object=aniso_sim)
+#' aniso_sam = aniso_SAM(sim_object=aniso_sim, model_name="BM",AIUQ_thr = c(0.999,0))
+#' show(aniso_sam)
+#' plot_MSD(aniso_sam,msd_truth = aniso_sam@msd_truth)
+aniso_SAM <- function(intensity=NA,intensity_str="T_SS_mat",pxsz=1, sz=c(NA,NA),
+                      mindt=1,AIUQ_thr=c(1,1),model_name='BM',sigma_0_2_ini=NaN,
+                      param_initial=NA,num_optim=1,msd_fn=NA,msd_grad_fn=NA,
+                      num_param=NA,uncertainty=FALSE,M=50,sim_object=NA, msd_truth=NA,
+                      method="AIUQ",index_q_AIUQ=NA, message_out=TRUE,
+                      square=FALSE){
 
-  model <- methods::new("SAM")
+  model <- methods::new("aniso_SAM")
   #check
   if(!is.character(intensity_str)){
     stop("Structure of the intensity profile input should be a character. \n")
@@ -147,23 +139,42 @@ SAM <- function(intensity=NA,intensity_str="T_SS_mat",pxsz=1,sz=c(NA,NA),mindt=1
   if(class(sim_object)[1]=="simulation"){
     intensity = sim_object@intensity
     model@pxsz = sim_object@pxsz
-    #model@mindt = sim_object@mindt
+    model@mindt = sim_object@mindt
     M = sim_object@M
-    #model_name = sim_object@model_name ##not always inherent
     len_t = sim_object@len_t
-    model@param_truth = get_true_param_sim(param_truth=sim_object@param,model_name=sim_object@model_name)
+    param = matrix(rep(sim_object@param,2),nrow=length(sim_object@param),ncol=2)
+    if(sim_object@model_name=="BM"){
+      model_param = apply(param,2,function(x){get_true_param_aniso_sim(param_truth=x,model_name=sim_object@model_name)})
+      model@param_truth = matrix(model_param,nrow=1,ncol=2)
+    }else{
+      model@param_truth = apply(param,2,function(x){get_true_param_aniso_sim(param_truth=x,model_name=sim_object@model_name)})
+    }
+    model@msd_truth = apply(model@param_truth, 2,function(x){get_MSD(theta = x ,d_input=0:(len_t-1),model_name=sim_object@model_name)})
+    model@sigma_2_0_truth = sim_object@sigma_2_0
+    sz = sim_object@sz
+  }else if(class(sim_object)[1]=="aniso_simulation"){
+    intensity = sim_object@intensity
+    model@pxsz = sim_object@pxsz
+    model@mindt = sim_object@mindt
+    M = sim_object@M
+    len_t = sim_object@len_t
+    if(sim_object@model_name=="BM"){
+      model_param = apply(sim_object@param,2,function(x){get_true_param_aniso_sim(param_truth=x,model_name=sim_object@model_name)})
+      model@param_truth = matrix(model_param,1)
+    }else{
+      model@param_truth = apply(sim_object@param,2,function(x){get_true_param_aniso_sim(param_truth=x,model_name=sim_object@model_name)})
+    }
     model@msd_truth = sim_object@theor_msd
     model@sigma_2_0_truth = sim_object@sigma_2_0
     sz = sim_object@sz
   }else{
     model@pxsz = pxsz
-    #model@mindt = mindt
-    model@msd_truth = msd_truth
+    model@mindt = mindt
+    model@msd_truth = matrix(msd_truth,1,1)
     model@sigma_2_0_truth = NA
-    model@param_truth = NA
+    model@param_truth = matrix(NA,1,1)
     sz = sz
   }
-  model@mindt = mindt
   if(is.vector(intensity)){
     if(is.na(intensity)){
       stop("Intensity profile can't be missing and should have one of the structure listed in intensity_str. \n")
@@ -204,11 +215,6 @@ SAM <- function(intensity=NA,intensity_str="T_SS_mat",pxsz=1,sz=c(NA,NA),mindt=1
   model@q = fft_list$q
   model@d_input = fft_list$d_input
 
-  if(!is.na(index_q_DDM)[1]){
-    if(min(index_q_DDM)<1 || max(index_q_DDM)>model@len_q){
-      stop("Selected q range should between 1 and half frame size. \n")
-    }
-  }
 
   if(!is.na(index_q_AIUQ)[1]){
     if(min(index_q_AIUQ)<1 || max(index_q_AIUQ)>model@len_q){
@@ -271,7 +277,6 @@ SAM <- function(intensity=NA,intensity_str="T_SS_mat",pxsz=1,sz=c(NA,NA),mindt=1
   model@A_est_ini = 2*(model@I_o_q_2_ori - I_o_q_2_ori_last)
 
   for (i in 1:model@len_q){
-    ##change to >=
     if(sum(model@A_est_ini[1:i])/sum(model@A_est_ini)>=AIUQ_thr[1]){
       num_q_max = i
       break
@@ -282,18 +287,21 @@ SAM <- function(intensity=NA,intensity_str="T_SS_mat",pxsz=1,sz=c(NA,NA),mindt=1
   }
 
   # get unique index
-  # improved this later, check one of the previous code where I have another way that doesn't require unique search
 
   #model@q_ori_ring_loc_unique_index = as.list(1:model@len_q)
   q_ori_ring_loc_unique_index = as.list(1:model@len_q)
+  # for(i in 1:model@len_q){
+  #   unique_val = unique(avg_I_2_ori[q_ori_ring_loc_index[[i]]])
+  #   unique_val = unique_val[1:(length(q_ori_ring_loc_index[[i]])/2)]
+  #   index_selected = NULL
+  #   for(j in 1:length(unique_val)){
+  #     index_selected = c(index_selected,which(avg_I_2_ori == unique_val[j])[1])
+  #   }
+  #   q_ori_ring_loc_unique_index[[i]] = index_selected
+  # }
   for(i in 1:model@len_q){
-    unique_val = unique(avg_I_2_ori[q_ori_ring_loc_index[[i]]])
-    unique_val = unique_val[1:(length(q_ori_ring_loc_index[[i]])/2)]
-    index_selected = NULL
-    for(j in 1:length(unique_val)){
-      index_selected = c(index_selected,which(avg_I_2_ori == unique_val[j])[1])
-    }
-    q_ori_ring_loc_unique_index[[i]] = index_selected
+    len_here = (length(q_ori_ring_loc_index[[i]])-2)/2
+    q_ori_ring_loc_unique_index[[i]] = q_ori_ring_loc_index[[i]][c(1,3:(3+len_here-1))]
   }
 
   total_q_ori_ring_loc_unique_index = NULL
@@ -302,12 +310,35 @@ SAM <- function(intensity=NA,intensity_str="T_SS_mat",pxsz=1,sz=c(NA,NA),mindt=1
                                         q_ori_ring_loc_unique_index[[i]])
   }
 
+  #anisotropic
+  if(model@sz[1]==model@sz[2]){
+    q1_unique_index=as.list(1:model@len_q)
+    q2_unique_index=as.list(1:model@len_q)
+    for(i in 1:model@len_q){
+      index_here=q_ori_ring_loc_unique_index[[i]]
+      total_num_unique_index_here=length(q_ori_ring_loc_unique_index[[i]])
+      q1_unique_index[[i]]=q2_unique_index[[i]]=rep(NA,total_num_unique_index_here)
+      for(j in 1:(total_num_unique_index_here)){
+        q1_unique_index[[i]][j]=floor((index_here[j]-1)/model@sz[1]) ##could contain zero
+        left_here=(index_here[j]-1)%%model@sz[1]
+        if(left_here<=model@len_q){
+          q2_unique_index[[i]][j]=(index_here[j]-1)%%model@sz[1] ##could contain zero
+        }else{
+          q2_unique_index[[i]][j]=model@sz[1]-(index_here[j]-1)%%model@sz[1]-1 ##could contain zero
+        }
+      }
+    }
+    q1 = c((1:((model@sz[1]-1)/2))*2*pi/(model@sz[1]*model@pxsz))
+    q2 = c((1:((model@sz[1]-1)/2))*2*pi/(model@sz[1]*model@pxsz))
+  }else{stop("Update for rectangular image!")}
+
 
   if(is.na(sigma_0_2_ini)){sigma_0_2_ini=min(model@I_o_q_2_ori)}
+
   if(sum(is.na(param_initial))>=1){
-    param_initial = get_initial_param(model_name=model@model_name,
-                                      sigma_0_2_ini=sigma_0_2_ini,
-                                      num_param=num_param)
+    param_initial = get_initial_param(model_name=paste(model@model_name,"_anisotropic",sep=""),
+                                        sigma_0_2_ini=sigma_0_2_ini,
+                                        num_param=num_param)
   }else{
     param_initial = log(c(param_initial,sigma_0_2_ini))
   }
@@ -318,66 +349,74 @@ SAM <- function(intensity=NA,intensity_str="T_SS_mat",pxsz=1,sz=c(NA,NA),mindt=1
       index_q_AIUQ = 1:num_q_max
     }
 
-    p = length(param_initial)-1
-    num_iteration_max = 50+(p-1)*10
-    lower_bound = c(rep(-30,p),-Inf)
+    p = (length(param_initial)-1)/2
+    num_iteration_max = 50+(2*p-1)*10
+    lower_bound = c(rep(-30,2*p),-Inf)
     if(model@model_name == "user_defined"){
       if(is.function(msd_grad_fn)==T){
-        gr = log_lik_grad
+        gr = anisotropic_log_lik_grad
       }else{gr = NULL}
-    }else{gr = log_lik_grad}
-    m_param = try(optim(param_initial,log_lik, gr=gr,
+    }else{gr = anisotropic_log_lik_grad}
+
+    m_param = try(optim(param_initial,anisotropic_log_lik, #gr=gr,
                         I_q_cur=fft_list$I_q_matrix,
                         B_cur=NA,index_q=index_q_AIUQ,
                         I_o_q_2_ori=model@I_o_q_2_ori,
                         q_ori_ring_loc_unique_index=q_ori_ring_loc_unique_index,
                         sz=model@sz,len_t=model@len_t,d_input=model@d_input,
-                        q=model@q,model_name=model@model_name,msd_fn=msd_fn,
-                        msd_grad_fn=msd_grad_fn,method='L-BFGS-B',lower=lower_bound,
+                        q1=q1,q2=q2,q1_unique_index=q1_unique_index,
+                        q2_unique_index=q2_unique_index,
+                        model_name=paste(model@model_name,"_anisotropic",sep=""),
+                        msd_fn=msd_fn,msd_grad_fn=msd_grad_fn,
+                        method='L-BFGS-B',lower=lower_bound,
                         control = list(fnscale=-1,maxit=num_iteration_max)),TRUE)
-     if(num_optim>1){
-       for(i_try in 1:(num_optim-1)){
-         param_initial_try=param_initial+i_try*runif(p+1)
-         if(message_out){
-           cat("start of another optimization, initial values: ",param_initial_try, "\n")
-         }
-         m_param_try = try(optim(param_initial_try,log_lik, gr=gr,
-                             I_q_cur=fft_list$I_q_matrix,
-                             B_cur=NA,index_q=index_q_AIUQ,
-                             I_o_q_2_ori=model@I_o_q_2_ori,
-                             q_ori_ring_loc_unique_index=q_ori_ring_loc_unique_index,
-                             sz=model@sz,len_t=model@len_t,d_input=model@d_input,
-                             q=model@q,model_name=model@model_name,msd_fn=msd_fn,
-                             msd_grad_fn=msd_grad_fn,method='L-BFGS-B',lower=lower_bound,
-                             control = list(fnscale=-1,maxit=num_iteration_max)),TRUE)
-         if(class(m_param)[1]!="try-error"){
-           if(class(m_param_try)[1]!="try-error"){
-             if(m_param_try$value>m_param$value){
-               m_param=m_param_try
-             }
-           }
-         }else{##if m_param has an error then change
-           m_param=m_param_try
-         }
+    if(num_optim>1){
+      for(i_try in 1:(num_optim-1)){
+        param_initial_try=param_initial+i_try*runif(2*p+1)
+        if(message_out){
+          cat("start of another optimization, initial values: ",param_initial_try, "\n")
+        }
+        m_param_try = try(optim(param_initial_try,anisotropic_log_lik, #gr=gr,
+                                I_q_cur=fft_list$I_q_matrix,B_cur=NA,
+                                index_q=index_q_AIUQ,I_o_q_2_ori=model@I_o_q_2_ori,
+                                q_ori_ring_loc_unique_index=q_ori_ring_loc_unique_index,
+                                sz=model@sz,len_t=model@len_t,d_input=model@d_input,
+                                qq1=q1,q2=q2,q1_unique_index=q1_unique_index,
+                                q2_unique_index=q2_unique_index,
+                                model_name=paste(model@model_name,"_anisotropic",sep=""),
+                                msd_fn=msd_fn,msd_grad_fn=msd_grad_fn,
+                                method='L-BFGS-B',lower=lower_bound,
+                                control = list(fnscale=-1,maxit=num_iteration_max)),TRUE)
+        if(class(m_param)[1]!="try-error"){
+          if(class(m_param_try)[1]!="try-error"){
+            if(m_param_try$value>m_param$value){
+              m_param=m_param_try
+            }
+          }
+        }else{##if m_param has an error then change
+          m_param=m_param_try
+        }
 
-       }
-     }
+      }
+    }
 
     count_compute=0 ##if it has an error in optimization, try some more
     while(class(m_param)[1]=="try-error"){
       count_compute=count_compute+1
-      param_initial_try=param_initial+count_compute*runif(p+1)
+      param_initial_try=param_initial+count_compute*runif(2*p+1)
       if(message_out){
         cat("start of another optimization, initial values: ",param_initial_try, "\n")
       }
-      m_param = try(optim(param_initial_try,log_lik,gr=gr,
+      m_param = try(optim(param_initial_try,anisotropic_log_lik, #gr=gr,
                           I_q_cur=fft_list$I_q_matrix,B_cur=NA,
                           index_q=index_q_AIUQ,I_o_q_2_ori=model@I_o_q_2_ori,
                           q_ori_ring_loc_unique_index=q_ori_ring_loc_unique_index,
                           sz=model@sz,len_t=model@len_t,d_input=model@d_input,
-                          q=model@q,model_name=model@model_name,msd_fn=msd_fn,
-                          msd_grad_fn=msd_grad_fn,method='L-BFGS-B',lower=lower_bound,
-                          control = list(fnscale=-1,maxit=num_iteration_max)),TRUE)
+                          q1=q1,q2=q2,q1_unique_index=q1_unique_index,
+                          q2_unique_index=q2_unique_index,
+                          model_name=paste(model@model_name,"_anisotropic",sep=""),
+                          msd_fn=msd_fn,msd_grad_fn=msd_grad_fn,method='L-BFGS-B',
+                          lower=lower_bound,control = list(fnscale=-1,maxit=num_iteration_max)),TRUE)
       if(count_compute>=2){
         break
       }
@@ -385,15 +424,17 @@ SAM <- function(intensity=NA,intensity_str="T_SS_mat",pxsz=1,sz=c(NA,NA),mindt=1
 
     ##if still not converge to a finite value, let's try no derivative search
     if(class(m_param)[1]=="try-error"){
-      m_param = try(optim(param_initial,log_lik,
+      m_param = try(optim(param_initial,anisotropic_log_lik,
                           I_q_cur=fft_list$I_q_matrix,
                           B_cur=NA,index_q=index_q_AIUQ,
                           I_o_q_2_ori=model@I_o_q_2_ori,
                           q_ori_ring_loc_unique_index=q_ori_ring_loc_unique_index,
                           sz=model@sz,len_t=model@len_t,d_input=model@d_input,
-                          q=model@q,model_name=model@model_name,msd_fn=msd_fn,
-                          msd_grad_fn=msd_grad_fn,method='L-BFGS-B',lower=lower_bound,
-                          control = list(fnscale=-1,maxit=num_iteration_max)),TRUE)
+                          q1=q1,q2=q2,q1_unique_index=q1_unique_index,
+                          q2_unique_index=q2_unique_index,
+                          model_name=paste(model@model_name,"_anisotropic",sep=""),
+                          msd_fn=msd_fn,msd_grad_fn=msd_grad_fn,method='L-BFGS-B',
+                          lower=lower_bound,control = list(fnscale=-1,maxit=num_iteration_max)),TRUE)
 
       count_compute=0
       while(class(m_param)[1]=="try-error"){
@@ -401,17 +442,20 @@ SAM <- function(intensity=NA,intensity_str="T_SS_mat",pxsz=1,sz=c(NA,NA),mindt=1
         #compute_twice=T
         ##change it to runif
         #c(rep(0.5,p),0)
-        param_initial_try=param_initial+count_compute*runif(p+1)
+        param_initial_try=param_initial+count_compute*runif(2*p+1)
         if(message_out){
           cat("start of another optimization, initial values: ",param_initial_try, "\n")
         }
-        m_param = try(optim(param_initial_try,log_lik,
+        m_param = try(optim(param_initial_try,anisotropic_log_lik,
                             I_q_cur=fft_list$I_q_matrix,B_cur=NA,
                             index_q=index_q_AIUQ,I_o_q_2_ori=model@I_o_q_2_ori,
                             q_ori_ring_loc_unique_index=q_ori_ring_loc_unique_index,
                             sz=model@sz,len_t=model@len_t,d_input=model@d_input,
-                            q=model@q,model_name=model@model_name,msd_fn=msd_fn,
-                            msd_grad_fn=msd_grad_fn,method='L-BFGS-B',lower=lower_bound,
+                            q1=q1,q2=q2,q1_unique_index=q1_unique_index,
+                            q2_unique_index=q2_unique_index,
+                            model_name=paste(model@model_name,"_anisotropic",sep=""),
+                            msd_fn=msd_fn,msd_grad_fn=msd_grad_fn,
+                            method='L-BFGS-B',lower=lower_bound,
                             control = list(fnscale=-1,maxit=num_iteration_max)),TRUE)
         if(count_compute>=2){
           break
@@ -423,24 +467,28 @@ SAM <- function(intensity=NA,intensity_str="T_SS_mat",pxsz=1,sz=c(NA,NA),mindt=1
     model@mle = m_param$value
     AIC = 2*(length(param_est)+length(index_q_AIUQ)-m_param$value)
     model@sigma_2_0_est = exp(param_est[length(param_est)])
-    #est_list = get_est_param_MSD(theta=exp(param_est),d_input=model@d_input,model_name = model@model_name)
 
-    model@param_est = get_est_param(theta=exp(param_est),model_name = model@model_name)
-    if(model@model_name=='user_defined'){
-      model@param_est = model@param_est[-length(param_initial)]
+    param_est = matrix(param_est[-length(param_est)],ncol=2)
+    if(model_name=="BM"){
+      param_est = apply(param_est,2,function(x){get_est_param(theta=exp(x),model_name = model@model_name)})
+      model@param_est = matrix(param_est,nrow=1,ncol=2)
+    }else{
+      model@param_est = apply(param_est,2,function(x){get_est_param(theta=exp(x),model_name = model@model_name)})
     }
-    model@msd_est = get_MSD(theta=model@param_est,d_input=model@d_input,
-                            model_name = model@model_name, msd_fn=msd_fn)
+    model@msd_est = apply(model@param_est, 2,function(x){get_MSD(theta = x,d_input=model@d_input,model_name=model@model_name, msd_fn=msd_fn)})
 
-    if(uncertainty==T && is.na(M)!=T){
-      param_uq_range=param_uncertainty(param_est=m_param$par,I_q_cur=fft_list$I_q_matrix,
+
+    if(uncertainty==TRUE && is.na(M)!=TRUE){
+      param_uq_range=param_uncertainty_anisotropic(param_est=m_param$par,I_q_cur=fft_list$I_q_matrix,
                                        index_q=index_q_AIUQ,
                                        I_o_q_2_ori=model@I_o_q_2_ori,
                                        q_ori_ring_loc_unique_index=q_ori_ring_loc_unique_index,
-                                       sz=model@sz,len_t=model@len_t,q=model@q,
+                                       sz=model@sz,len_t=model@len_t,
+                                       q1=q1,q2=q2,q1_unique_index=q1_unique_index,
+                                       q2_unique_index=q2_unique_index,
                                        d_input=model@d_input,
-                                       model_name=model@model_name,M=M,
-                                       num_iteration_max=num_iteration_max,
+                                       model_name=paste(model@model_name,"_anisotropic",sep=""),
+                                       M=M,num_iteration_max=num_iteration_max,
                                        lower_bound=lower_bound,msd_fn=msd_fn,
                                        msd_grad_fn=msd_grad_fn)
 
@@ -451,134 +499,29 @@ SAM <- function(intensity=NA,intensity_str="T_SS_mat",pxsz=1,sz=c(NA,NA),mindt=1
                                max((m_param$par[i_p]),param_uq_range[2,i_p]))
 
       }
-      SAM_range_list=get_est_parameters_MSD_SAM_interval(param_uq_range,
+      SAM_range_list=get_est_parameters_MSD_SAM_interval_anisotropic(param_uq_range,
                                                          model_name=model@model_name,
                                                          d_input=model@d_input, msd_fn=msd_fn)
       model@uncertainty  = uncertainty
-      model@msd_lower = SAM_range_list$MSD_lower
-      model@msd_upper = SAM_range_list$MSD_upper
+      model@msd_x_lower = SAM_range_list$MSD_x_lower
+      model@msd_x_upper = SAM_range_list$MSD_x_upper
+      model@msd_y_lower = SAM_range_list$MSD_y_lower
+      model@msd_y_upper = SAM_range_list$MSD_y_upper
       model@param_uq_range = cbind(SAM_range_list$est_parameters_lower,SAM_range_list$est_parameters_upper)
     }else{
-      model@uncertainty  = uncertainty
-      model@msd_lower = NA
-      model@msd_upper = NA
+      model@uncertainty = FALSE
+      model@msd_x_lower = NA
+      model@msd_x_upper = NA
+      model@msd_y_lower = NA
+      model@msd_y_upper = NA
       model@param_uq_range = matrix(NA,1,1)
     }
-
-    if(output_dqt==FALSE && output_isf==FALSE){
-      Dqt = matrix(NA,1,1)
-      isf = matrix(NA,1,1)
-    }else if(output_dqt==TRUE && output_isf==FALSE){
-      Dqt = SAM_Dqt(len_q=model@len_q,index_q=1:model@len_q,len_t=model@len_t,
-                    I_q_matrix=fft_list$I_q_matrix,sz=model@sz,
-                    q_ori_ring_loc_unique_index=q_ori_ring_loc_unique_index)
-      isf = matrix(NA,1,1)
-    }else if(output_isf==TRUE){
-      Dqt = matrix(NA,model@len_q,model@len_t-1)
-      isf = matrix(NA,model@len_q,model@len_t-1)
-      for (q_j in 1:model@len_q){
-        index_cur = q_ori_ring_loc_unique_index[[q_j]]
-        I_q_cur = fft_list$I_q_matrix[index_cur,]
-        for (t_i in 1:(model@len_t-1)){
-          Dqt[q_j,t_i]=mean((abs(I_q_cur[,(t_i+1):model@len_t]-I_q_cur[,1:(model@len_t-t_i)]))^2/(model@sz[1]*model@sz[2]),na.rm=T)
-        }
-        if(model@A_est_ini[q_j]==0){break}
-        isf[q_j,] = 1-(Dqt[q_j,]-model@B_est_ini)/model@A_est_ini[q_j]
-      }
-    }
-
-  }else if(model@method == "DDM_fixedAB"){
-    if(length(index_q_DDM)==1 &&is.na(index_q_DDM)){
-      index_q_DDM = 1:model@len_q
-    }
-    Dqt = SAM_Dqt(len_q=model@len_q,index_q=index_q_DDM,len_t=model@len_t,
-                  I_q_matrix=fft_list$I_q_matrix,sz=model@sz,
-                  q_ori_ring_loc_unique_index=q_ori_ring_loc_unique_index)
-    if(output_isf==TRUE){
-      isf = matrix(NA,model@len_q,model@len_t-1)
-      for (q_j in 1:model@len_q){
-        if(model@A_est_ini[q_j]==0){break}
-        isf[q_j,] = 1-(Dqt[q_j,]-model@B_est_ini)/model@A_est_ini[q_j]
-        }
-      }else{
-        isf = matrix(NA,1,1)
-      }
-
-    l2_est_list = theta_est_l2_dqt_fixedAB(param=param_initial[-length(param_initial)],q=model@q,index_q=index_q_DDM,
-                                           Dqt=Dqt,A_est_q=model@A_est_ini,B_est=model@B_est_ini,
-                                           d_input=model@d_input, model_name=model@model_name,
-                                           msd_fn=msd_fn,msd_grad_fn=msd_grad_fn)
-
-
-    model@param_est = l2_est_list$param_est
-    model@msd_est = l2_est_list$msd_est
-    model@sigma_2_0_est = model@B_est_ini/2
-    p = NaN
-    AIC = NaN
-    model@mle = NaN
-    model@param_uq_range = matrix(NA,1,1)
-  }else if(model@method == "DDM_estAB"){
-    if(length(index_q_DDM)==1 &&is.na(index_q_DDM)){
-      index_q_DDM = 1:model@len_q
-    }
-    Dqt = SAM_Dqt(len_q=model@len_q,index_q=index_q_DDM,len_t=model@len_t,
-                  I_q_matrix=fft_list$I_q_matrix,sz=model@sz,
-                  q_ori_ring_loc_unique_index=q_ori_ring_loc_unique_index)
-    if(output_isf==TRUE){
-      isf = matrix(NA,model@len_q,model@len_t-1)
-      for (q_j in 1:model@len_q){
-        if(model@A_est_ini[q_j]==0){break}
-        isf[q_j,] = 1-(Dqt[q_j,]-model@B_est_ini)/model@A_est_ini[q_j]
-      }
-    }else{
-      isf = matrix(NA,1,1)
-    }
-
-    l2_est_list = theta_est_l2_dqt_estAB(param=param_initial,q=model@q,index_q=index_q_DDM,
-                                         Dqt=Dqt,A_ini=model@A_est_ini,d_input=model@d_input,
-                                         model_name=model@model_name,msd_fn=msd_fn,msd_grad_fn=msd_grad_fn)
-
-    model@param_est = l2_est_list$param_est
-    model@msd_est = l2_est_list$msd_est
-    model@sigma_2_0_est = l2_est_list$sigma_2_0_est
-    A_est = l2_est_list$A_est
-    p = NaN
-    AIC = NaN
-    model@mle = NaN
-    model@param_uq_range = matrix(NA,1,1)
-  }
-
-  model@Dqt = Dqt
-  model@ISF = isf
-
-  if(output_modeled_dqt==FALSE && output_modeled_isf==FALSE){
-    model@modeled_Dqt = matrix(NA,1,1)
-    model@modeled_ISF = matrix(NA,1,1)
-  }else if(output_modeled_isf==TRUE && output_modeled_dqt==FALSE){
-    model@modeled_ISF = matrix(NA,model@len_q,model@len_t-1)
-    model@modeled_Dqt = matrix(NA,1,1)
-    for(q_j in 1:model@len_q){
-      q_selected = model@q[q_j]
-      model@modeled_ISF [q_j,] = exp(-q_selected^2*model@msd_est[-1]/4)
-    }
-  }else if(output_modeled_dqt==TRUE){
-    model@modeled_ISF  = matrix(NA,model@len_q,model@len_t-1)
-    model@modeled_Dqt = matrix(NA,model@len_q,model@len_t-1)
-    for(q_j in 1:model@len_q){
-      q_selected = model@q[q_j]
-      model@modeled_ISF[q_j,] = exp(-q_selected^2*model@msd_est[-1]/4)
-      if(model@A_est_ini[q_j]==0){break}
-      model@modeled_Dqt[q_j,] = model@A_est_ini[q_j]*(1-model@modeled_ISF[q_j,])+model@sigma_2_0_est*2
-    }
-
   }
 
   if(model@method=='AIUQ'){
-     model@index_q = index_q_AIUQ
-  }else{ ##DDM
-    model@index_q = index_q_DDM
-
+    model@index_q = index_q_AIUQ
   }
+
   model@I_q = fft_list$I_q_matrix
   #model@p = p
   model@AIC = AIC

@@ -8,6 +8,7 @@ plot_intensity(
   intensity,
   intensity_str = "T_SS_mat",
   frame = 1,
+  sz = NA,
   title = NA,
   color = FALSE
 )
@@ -19,6 +20,8 @@ plot_intensity(
 ('SST_array','S_ST_mat','T_SS_mat', 'SS_T_mat'). See 'Details'.}
 
 \item{frame}{frame index}
+
+\item{sz}{frame size of simulated image with default \code{c(200,200)}.}
 
 \item{title}{main title of the plot. If \code{NA}, title is "intensity profile
 for frame n" with n being the frame index in \code{frame}.}
@@ -46,7 +49,7 @@ input intensity profile should be a space\eqn{\times}{\%\times}space by time mat
 library(AIUQ)
 sim_bm = simulation(sz=100,len_t=100,sigma_bm=0.5)
 show(sim_bm)
-plot_intensity(sim_bm@intensity)
+plot_intensity(sim_bm@intensity, sz=sim_bm@sz)
 
 }
 \author{

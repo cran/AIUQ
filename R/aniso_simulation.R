@@ -1,8 +1,8 @@
-#' Simulate 2D particle movement
+#' Simulate anisotropic 2D particle movement
 #'
 #' @description
-#' Simulate 2D particle movement from a user selected stochastic process, and
-#' output intensity profiles.
+#' Simulate anisotropic 2D particle movement from a user selected stochastic
+#' process, and output intensity profiles.
 #'
 #' @param sz frame size of simulated image with default \code{c(200,200)}.
 #' @param len_t number of time steps with default 200.
@@ -16,16 +16,19 @@
 #' and 255, with default 255.
 #' @param pos0 initial position for M particles, matrix with dimension M by 2.
 #' @param rho correlation between successive step and previous step in O-U
-#' process, value between 0 and 1, with default 0.95.
-#' @param H Hurst parameter of fractional Brownian Motion, value between 0 and 1,
-#' with default 0.3.
+#' process, in x, y-directions. A vector of length 2 with values between 0 and 1,
+#' default \code{c(0.95,0.9)}.
+#' @param H Hurst parameter of fractional Brownian Motion, in x, y-directions.
+#' A vector of length 2, value between 0 and 1, default \code{c(0.4,0.3)}.
 #' @param sigma_p radius of the spherical particle (3sigma_p), with default 2.
-#' @param sigma_bm distance moved per time step in Brownian Motion, with default 1.
-#' @param sigma_ou distance moved per time step in Ornstein–Uhlenbeck process,
-#' with default 2.
-#' @param sigma_fbm distance moved per time step in fractional Brownian Motion,
-#' with default 2.
-#' @return Returns an S4 object of class \code{simulation}.
+#' @param sigma_bm distance moved per time step of Brownian Motion,
+#' in x,y-directions. A vector of length 2 with default \code{c(1,0.5)}.
+#' @param sigma_ou distance moved per time step of Ornstein–Uhlenbeck process,
+#' in x, y-directions. A vector of length 2 with default \code{c(2,1.5)}.
+#' @param sigma_fbm distance moved per time step of fractional Brownian Motion,
+#' in x, y-directions. A vector of length 2 with default \code{c(2,1.5)}.
+#'
+#' @return Returns an S4 object of class \code{anisotropic_simulation}.
 #' @export
 #' @author \packageAuthor{AIUQ}
 #' @references
@@ -47,26 +50,28 @@
 #' # Example 1: Simple diffusion for 200 images with
 #' #            200 by 200 pixels and 50 particles
 #' # -------------------------------------------------
-#' sim_bm = simulation()
-#' show(sim_bm)
+#' aniso_sim_bm = aniso_simulation()
+#' show(aniso_sim_bm)
 #'
 #' # -------------------------------------------------
 #' # Example 2: Simple diffusion for 100 images with
 #' #            100 by 100 pixels and slower speed
 #' # -------------------------------------------------
-#' sim_bm = simulation(sz=100,len_t=100,sigma_bm=0.5)
-#' show(sim_bm)
+#' aniso_sim_bm = aniso_simulation(sz=100,len_t=100,sigma_bm=c(0.5,0.1))
+#' show(aniso_sim_bm)
 #'
 #' # -------------------------------------------------
 #' # Example 3: Ornstein-Uhlenbeck process
 #' # -------------------------------------------------
-#' sim_ou = simulation(model_name="OU")
-#' show(sim_ou)
-simulation <- function(sz=c(200,200), len_t=200, M=50, model_name="BM",noise="gaussian",
-                       I0=20, Imax=255, pos0=matrix(NaN,nrow=M,ncol=2),rho=0.95,
-                       H=0.3, sigma_p=2, sigma_bm=1,sigma_ou=2, sigma_fbm=2){
+#' aniso_sim_ou = aniso_simulation(model_name="OU")
+#' show(aniso_sim_ou)
+aniso_simulation <- function(sz=c(200,200), len_t=200, M=50, model_name="BM",
+                             noise="gaussian", I0=20, Imax=255,
+                             pos0=matrix(NaN,nrow=M,ncol=2), rho=c(0.95,0.9),
+                             H=c(0.4,0.3), sigma_p=2,sigma_bm=c(1,0.5),
+                             sigma_ou=c(2,1.5), sigma_fbm=c(2,1.5)){
 
-  model <- methods::new("simulation")
+  model <- methods::new("aniso_simulation")
 
   #check
   len_t = as.integer(len_t)
@@ -80,7 +85,7 @@ simulation <- function(sz=c(200,200), len_t=200, M=50, model_name="BM",noise="ga
   if(!is.character(model_name)){
     stop("Type of stochastic process should be a character value. \n")
   }
-    if(model_name!="BM" && model_name!="OU" && model_name!="FBM" && model_name!="OU+FBM"){
+  if(model_name!="BM" && model_name!="OU" && model_name!="FBM" && model_name!="OU+FBM"){
     stop("Type of stochastic process should be one of the type listed in help page. \n")
   }
   if(!is.character(noise)){
@@ -110,10 +115,16 @@ simulation <- function(sz=c(200,200), len_t=200, M=50, model_name="BM",noise="ga
   if(!is.numeric(rho)){
     stop("Correlation between steps in O-U process should be numeric. \n")
   }
+  if(length(rho)==1){
+    rho=c(rho,rho)
+  }
   if(!is.numeric(H)){
     stop("Hurst parameter of fractional Brownian Motion should be numeric. \n")
   }
-  if(H<0 || H>1){
+  if(length(H)==1){
+    H=c(H,H)
+  }
+  if(H[1]<0 || H[2]<0 || H[1]>1 || H[2]>1){
     stop("Hurst parameter of fractional Brownian Motion should have value between 0 and 1. \n")
   }
   if(!is.numeric(sigma_p)){
@@ -122,11 +133,20 @@ simulation <- function(sz=c(200,200), len_t=200, M=50, model_name="BM",noise="ga
   if(!is.numeric(sigma_bm)){
     stop("Distance moved per time step in Brownian Motion should be numeric. \n")
   }
+  if(length(sigma_bm)==1){
+    sigma_bm=c(sigma_bm,sigma_bm)
+  }
   if(!is.numeric(sigma_ou)){
     stop("Distance moved per time step in Ornstein Uhlenbeck process should be numeric. \n")
   }
+  if(length(sigma_ou)==1){
+    sigma_ou=c(sigma_ou,sigma_ou)
+  }
   if(!is.numeric(sigma_fbm)){
     stop("Distance moved per time step in fractional Brownian Motion should be numeric. \n")
+  }
+  if(length(sigma_fbm)==1){
+    sigma_fbm=c(sigma_fbm,sigma_fbm)
   }
 
   # Simulation particle trajectory for isotropic process
@@ -135,22 +155,32 @@ simulation <- function(sz=c(200,200), len_t=200, M=50, model_name="BM",noise="ga
                     sz[1]/8+0.75*sz[1]*stats::runif(M)),nrow=M,ncol=2)
   }
   if(model_name == "BM"){
-    pos = bm_particle_intensity(pos0=pos0,M=M,len_t=len_t,sigma=sigma_bm)
-    model@param = c(sigma_bm)
+    pos = anisotropic_bm_particle_intensity(pos0=pos0,M=M,len_t=len_t,
+                                            sigma=sigma_bm)
+    model@param = matrix(sigma_bm,nrow=1,ncol=2)
   }else if(model_name == "OU"){
-    pos = ou_particle_intensity(pos0=pos0,M=M,len_t=len_t,sigma=sigma_ou,rho=rho)
-    model@param = c(rho,sigma_ou)
+    pos = anisotropic_ou_particle_intensity(pos0=pos0,M=M,len_t=len_t,
+                                            sigma=sigma_ou,rho=rho)
+    model@param = rbind(rho,sigma_ou)
   }else if(model_name == "FBM"){
-    pos = fbm_particle_intensity(pos0=pos0,M=M,len_t=len_t,sigma=sigma_fbm,H=H)
-    model@param = c(sigma_fbm,H)
+    pos = anisotropic_fbm_particle_intensity(pos0=pos0,M=M,len_t=len_t,
+                                             sigma=sigma_fbm,H=H)
+    model@param = rbind(sigma_fbm,H)
   }else if(model_name == "OU+FBM"){
-    pos = fbm_ou_particle_intensity(pos0=pos0,M=M,len_t=len_t,H=H, rho=rho,
-                                    sigma_ou = sigma_ou, sigma_fbm = sigma_fbm)
-    model@param = c(rho,sigma_ou,sigma_fbm,H)
+    pos = anisotropic_fbm_ou_particle_intensity(pos0=pos0,M=M,len_t=len_t,H=H,
+                                                rho=rho,sigma_ou = sigma_ou,
+                                                sigma_fbm = sigma_fbm)
+    model@param = rbind(rho,sigma_ou,sigma_fbm,H)
   }
 
-  model_param = get_true_param_sim(param_truth=model@param,model_name=model_name)
-  model@theor_msd = get_MSD(theta = model_param ,d_input=0:(len_t-1),model_name=model_name)
+  if(model_name=="BM"){
+    model_param = apply(model@param,2,function(x){get_true_param_aniso_sim(param_truth=x,model_name=model_name)})
+    model_param = matrix(model_param,nrow=1,ncol=2)
+  }else{
+    model_param = apply(model@param,2,function(x){get_true_param_aniso_sim(param_truth=x,model_name=model_name)})
+  }
+  model@theor_msd = apply(model_param, 2,function(x){get_MSD(theta = x ,d_input=0:(len_t-1),model_name=model_name)})
+
   # Fill intensity
   if(length(I0) == len_t){
     if(noise == "uniform"){
@@ -185,7 +215,7 @@ simulation <- function(sz=c(200,200), len_t=200, M=50, model_name="BM",noise="ga
   model@M = M
   model@model_name = model_name
   model@pos = pos
-  model@num_msd = numerical_msd(pos=model@pos,M=model@M,len_t=model@len_t)
+  model@num_msd = anisotropic_numerical_msd(pos=model@pos,M=model@M,len_t=model@len_t)
 
   return(model)
 }

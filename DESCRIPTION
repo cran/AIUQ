@@ -1,7 +1,7 @@
 Package: AIUQ
 Type: Package
 Title: Ab Initio Uncertainty Quantification
-Version: 0.5.0
+Version: 0.5.1
 Authors@R: 
     c(person("Yue", "He", role = "aut"),
 	  person("Xubo", "Liu", role = "aut"),
@@ -17,6 +17,6 @@ RoxygenNote: 7.2.3
 Imports: fftwtools (>= 0.9.11), SuperGauss (>= 2.0.3), methods, plot3D
         (>= 1.4)
 NeedsCompilation: no
-Packaged: 2023-11-14 07:08:17 UTC; mengyanggu
+Packaged: 2024-02-12 00:14:46 UTC; mengyanggu
 Repository: CRAN
-Date/Publication: 2023-11-14 17:50:08 UTC
+Date/Publication: 2024-02-12 19:50:02 UTC

@@ -1,0 +1,2 @@
+##change / AIUQ 0.5.1
+ * implement simulation and estimation of the anisotropic process through aniso_simulation() and aniso_SAM()

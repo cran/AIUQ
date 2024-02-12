@@ -9,7 +9,8 @@ plot_MSD(object, msd_truth = NA, title = NA, log10 = TRUE)
 \arguments{
 \item{object}{an S4 object of class \code{SAM}}
 
-\item{msd_truth}{a vector of true MSD or reference MSD value, default is \code{NA}}
+\item{msd_truth}{a vector/matrix of true MSD or reference MSD value,
+default is \code{NA}}
 
 \item{title}{main title of the plot. If \code{NA}, title is "model_name" with
 \code{model_name} being a field in \code{SAM} class representing fitted model.}
@@ -29,15 +30,16 @@ library(AIUQ)
 
 ## Simulate BM and get estimated parameters with uncertainty using BM model
 # Simulation
+set.seed(1)
 sim_bm = simulation(sz=100,len_t=100,sigma_bm=0.5)
 show(sim_bm)
 
-# AIUQ method: fitting using BM model with a reduced range
-sam = SAM(sim_object=sim_bm, uncertainty=TRUE,AIUQ_thr=c(0.999,0.5))
+# AIUQ method: fitting using BM model
+sam = SAM(sim_object=sim_bm, uncertainty=TRUE,AIUQ_thr=c(0.999,0))
 show(sam)
 
 plot_MSD(object=sam, msd_truth=sam@msd_truth) #in log10 scale
-#plot_MSD(object=sam, msd_truth=sam@msd_truth,log10=FALSE) #in real scale
+plot_MSD(object=sam, msd_truth=sam@msd_truth,log10=FALSE) #in real scale
 
 }
 \references{

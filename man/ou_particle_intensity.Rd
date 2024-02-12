@@ -4,7 +4,7 @@
 \alias{ou_particle_intensity}
 \title{Simulate 2D particle trajectory follows OU process}
 \usage{
-ou_particle_intensity(pos0, M, len_t, mu, sigma, rho)
+ou_particle_intensity(pos0, M, len_t, sigma, rho)
 }
 \arguments{
 \item{pos0}{initial position for \code{M} particles, matrix with dimension M by 2}
@@ -12,8 +12,6 @@ ou_particle_intensity(pos0, M, len_t, mu, sigma, rho)
 \item{M}{number of particles}
 
 \item{len_t}{number of time steps}
-
-\item{mu}{mean velocity of the drift}
 
 \item{sigma}{distance moved per time step}
 
@@ -33,12 +31,10 @@ Simulate 2D particle trajectory follows Ornstein–Uhlenbeck process(OU) for
 library(AIUQ)
 M = 10
 len_t = 50
-mu = 0
 sigma = 2
 rho = 0.95
 pos0 = matrix(100/8+0.75*100*runif(M*2),nrow=M,ncol=2)
-
-pos = ou_particle_intensity(pos0=pos0,M=M,len_t=len_t,mu=mu,sigma=sigma, rho=rho)
+pos = ou_particle_intensity(pos0=pos0,M=M,len_t=len_t,sigma=sigma, rho=rho)
 }
 \author{
 \packageAuthor{AIUQ}
