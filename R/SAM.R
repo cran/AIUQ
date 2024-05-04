@@ -32,11 +32,13 @@
 #' @param M number of particles. See 'Details'.
 #' @param sim_object NA or an S4 object of class \code{simulation}.
 #' @param msd_truth true MSD or reference MSD value.
-#' @param method methods for parameter estimation, options from ('AIUQ', 'DDM').
+#' @param method methods for parameter estimation, options from ('AIUQ','DDM_fixedAB','DDM_estAB').
 #' @param index_q_AIUQ index range for wave number when using AIUQ method. See 'Details'.
 #' @param index_q_DDM index range for wave number when using DDM method. See 'Details'.
 #' @param message_out a logical evaluating to TRUE or FALSE indicating whether
 #' or not to output the message.
+#' @param A_neg controls modification for negative A(q), options from  ('abs','zero'),
+#' with setting negative A(q) to its absolute value as the default.
 #' @param square a logical evaluating to TRUE or FALSE indicating whether or not
 #' to crop the original intensity profile into square image.
 #' @param output_dqt a logical evaluating to TRUE or FALSE indicating whether or
@@ -74,9 +76,8 @@
 #' \code{simulation} class for simulated data using \code{simulation} in AIUQ
 #' package.
 #'
-#' By default, using all wave vectors from complete q ring for both \code{AIUQ}
-#' and \code{DDM} method, unless user defined index range through \code{index_q_AIUQ}
-#' or \code{index_q_DDM}.
+#' By default, using all wave vectors from complete q ring, unless user defined
+#' index range through \code{index_q_AIUQ} or \code{index_q_DDM}.
 #'
 #' @return Returns an S4 object of class \code{SAM}.
 #' @export
@@ -106,7 +107,7 @@ SAM <- function(intensity=NA,intensity_str="T_SS_mat",pxsz=1,sz=c(NA,NA),mindt=1
                 num_optim=1,msd_fn=NA,msd_grad_fn=NA,num_param=NA,
                 uncertainty=FALSE,M=50,sim_object=NA, msd_truth=NA,
                 method="AIUQ",index_q_AIUQ=NA, index_q_DDM=NA,message_out=TRUE,
-                square=FALSE, output_dqt=FALSE, output_isf=FALSE,
+                A_neg="abs", square=FALSE, output_dqt=FALSE, output_isf=FALSE,
                 output_modeled_isf=FALSE,output_modeled_dqt=FALSE){
 
   model <- methods::new("SAM")
@@ -267,12 +268,11 @@ SAM <- function(intensity=NA,intensity_str="T_SS_mat",pxsz=1,sz=c(NA,NA),mindt=1
   }
   I_o_q_2_ori_last = model@I_o_q_2_ori[model@len_q]
 
-  model@B_est_ini = 2*I_o_q_2_ori_last
-  model@A_est_ini = 2*(model@I_o_q_2_ori - I_o_q_2_ori_last)
+  B_est_ini = 2*I_o_q_2_ori_last
+  A_est_ini = 2*(model@I_o_q_2_ori - I_o_q_2_ori_last)
 
   for (i in 1:model@len_q){
-    ##change to >=
-    if(sum(model@A_est_ini[1:i])/sum(model@A_est_ini)>=AIUQ_thr[1]){
+    if(sum(A_est_ini[1:i])/sum(A_est_ini)>=AIUQ_thr[1]){
       num_q_max = i
       break
     }
@@ -282,18 +282,21 @@ SAM <- function(intensity=NA,intensity_str="T_SS_mat",pxsz=1,sz=c(NA,NA),mindt=1
   }
 
   # get unique index
-  # improved this later, check one of the previous code where I have another way that doesn't require unique search
 
   #model@q_ori_ring_loc_unique_index = as.list(1:model@len_q)
   q_ori_ring_loc_unique_index = as.list(1:model@len_q)
+  # for(i in 1:model@len_q){
+  #   unique_val = unique(avg_I_2_ori[q_ori_ring_loc_index[[i]]])
+  #   unique_val = unique_val[1:(length(q_ori_ring_loc_index[[i]])/2)]
+  #   index_selected = NULL
+  #   for(j in 1:length(unique_val)){
+  #     index_selected = c(index_selected,which(avg_I_2_ori == unique_val[j])[1])
+  #   }
+  #   q_ori_ring_loc_unique_index[[i]] = index_selected
+  # }
   for(i in 1:model@len_q){
-    unique_val = unique(avg_I_2_ori[q_ori_ring_loc_index[[i]]])
-    unique_val = unique_val[1:(length(q_ori_ring_loc_index[[i]])/2)]
-    index_selected = NULL
-    for(j in 1:length(unique_val)){
-      index_selected = c(index_selected,which(avg_I_2_ori == unique_val[j])[1])
-    }
-    q_ori_ring_loc_unique_index[[i]] = index_selected
+    len_here = (length(q_ori_ring_loc_index[[i]])-2)/2
+    q_ori_ring_loc_unique_index[[i]] = q_ori_ring_loc_index[[i]][c(1,3:(3+len_here-1))]
   }
 
   total_q_ori_ring_loc_unique_index = NULL
@@ -309,7 +312,7 @@ SAM <- function(intensity=NA,intensity_str="T_SS_mat",pxsz=1,sz=c(NA,NA),mindt=1
                                       sigma_0_2_ini=sigma_0_2_ini,
                                       num_param=num_param)
   }else{
-    param_initial = log(c(param_initial,sigma_0_2_ini))
+    param_initial = c(param_initial,sigma_0_2_ini)
   }
 
   if(model@method == "AIUQ"){
@@ -325,10 +328,12 @@ SAM <- function(intensity=NA,intensity_str="T_SS_mat",pxsz=1,sz=c(NA,NA),mindt=1
       if(is.function(msd_grad_fn)==T){
         gr = log_lik_grad
       }else{gr = NULL}
+    }else if(A_neg=="zero"){
+      gr = NULL
     }else{gr = log_lik_grad}
     m_param = try(optim(param_initial,log_lik, gr=gr,
                         I_q_cur=fft_list$I_q_matrix,
-                        B_cur=NA,index_q=index_q_AIUQ,
+                        B_cur=NA, A_neg = A_neg, index_q=index_q_AIUQ,
                         I_o_q_2_ori=model@I_o_q_2_ori,
                         q_ori_ring_loc_unique_index=q_ori_ring_loc_unique_index,
                         sz=model@sz,len_t=model@len_t,d_input=model@d_input,
@@ -343,7 +348,7 @@ SAM <- function(intensity=NA,intensity_str="T_SS_mat",pxsz=1,sz=c(NA,NA),mindt=1
          }
          m_param_try = try(optim(param_initial_try,log_lik, gr=gr,
                              I_q_cur=fft_list$I_q_matrix,
-                             B_cur=NA,index_q=index_q_AIUQ,
+                             B_cur=NA, A_neg = A_neg,index_q=index_q_AIUQ,
                              I_o_q_2_ori=model@I_o_q_2_ori,
                              q_ori_ring_loc_unique_index=q_ori_ring_loc_unique_index,
                              sz=model@sz,len_t=model@len_t,d_input=model@d_input,
@@ -371,7 +376,7 @@ SAM <- function(intensity=NA,intensity_str="T_SS_mat",pxsz=1,sz=c(NA,NA),mindt=1
         cat("start of another optimization, initial values: ",param_initial_try, "\n")
       }
       m_param = try(optim(param_initial_try,log_lik,gr=gr,
-                          I_q_cur=fft_list$I_q_matrix,B_cur=NA,
+                          I_q_cur=fft_list$I_q_matrix,B_cur=NA, A_neg = A_neg,
                           index_q=index_q_AIUQ,I_o_q_2_ori=model@I_o_q_2_ori,
                           q_ori_ring_loc_unique_index=q_ori_ring_loc_unique_index,
                           sz=model@sz,len_t=model@len_t,d_input=model@d_input,
@@ -387,7 +392,7 @@ SAM <- function(intensity=NA,intensity_str="T_SS_mat",pxsz=1,sz=c(NA,NA),mindt=1
     if(class(m_param)[1]=="try-error"){
       m_param = try(optim(param_initial,log_lik,
                           I_q_cur=fft_list$I_q_matrix,
-                          B_cur=NA,index_q=index_q_AIUQ,
+                          B_cur=NA, A_neg = A_neg,index_q=index_q_AIUQ,
                           I_o_q_2_ori=model@I_o_q_2_ori,
                           q_ori_ring_loc_unique_index=q_ori_ring_loc_unique_index,
                           sz=model@sz,len_t=model@len_t,d_input=model@d_input,
@@ -406,7 +411,7 @@ SAM <- function(intensity=NA,intensity_str="T_SS_mat",pxsz=1,sz=c(NA,NA),mindt=1
           cat("start of another optimization, initial values: ",param_initial_try, "\n")
         }
         m_param = try(optim(param_initial_try,log_lik,
-                            I_q_cur=fft_list$I_q_matrix,B_cur=NA,
+                            I_q_cur=fft_list$I_q_matrix,B_cur=NA, A_neg = A_neg,
                             index_q=index_q_AIUQ,I_o_q_2_ori=model@I_o_q_2_ori,
                             q_ori_ring_loc_unique_index=q_ori_ring_loc_unique_index,
                             sz=model@sz,len_t=model@len_t,d_input=model@d_input,
@@ -434,7 +439,7 @@ SAM <- function(intensity=NA,intensity_str="T_SS_mat",pxsz=1,sz=c(NA,NA),mindt=1
 
     if(uncertainty==T && is.na(M)!=T){
       param_uq_range=param_uncertainty(param_est=m_param$par,I_q_cur=fft_list$I_q_matrix,
-                                       index_q=index_q_AIUQ,
+                                       index_q=index_q_AIUQ,A_neg=A_neg,
                                        I_o_q_2_ori=model@I_o_q_2_ori,
                                        q_ori_ring_loc_unique_index=q_ori_ring_loc_unique_index,
                                        sz=model@sz,len_t=model@len_t,q=model@q,
@@ -482,9 +487,17 @@ SAM <- function(intensity=NA,intensity_str="T_SS_mat",pxsz=1,sz=c(NA,NA),mindt=1
         for (t_i in 1:(model@len_t-1)){
           Dqt[q_j,t_i]=mean((abs(I_q_cur[,(t_i+1):model@len_t]-I_q_cur[,1:(model@len_t-t_i)]))^2/(model@sz[1]*model@sz[2]),na.rm=T)
         }
-        if(model@A_est_ini[q_j]==0){break}
-        isf[q_j,] = 1-(Dqt[q_j,]-model@B_est_ini)/model@A_est_ini[q_j]
+        if(A_est_ini[q_j]==0){break}
+        isf[q_j,] = 1-(Dqt[q_j,]-B_est_ini)/A_est_ini[q_j]
       }
+    }
+
+    model@B_est = model@sigma_2_0_est*2
+    if(A_neg=="abs"){
+      model@A_est = abs(2*(model@I_o_q_2_ori - model@B_est/2))
+    }else if(A_neg=="zero"){
+      model@A_est = 2*(model@I_o_q_2_ori- model@B_est/2)
+      model@A_est = ifelse(model@A_est>0,model@A_est,0)
     }
 
   }else if(model@method == "DDM_fixedAB"){
@@ -497,22 +510,23 @@ SAM <- function(intensity=NA,intensity_str="T_SS_mat",pxsz=1,sz=c(NA,NA),mindt=1
     if(output_isf==TRUE){
       isf = matrix(NA,model@len_q,model@len_t-1)
       for (q_j in 1:model@len_q){
-        if(model@A_est_ini[q_j]==0){break}
-        isf[q_j,] = 1-(Dqt[q_j,]-model@B_est_ini)/model@A_est_ini[q_j]
+        if(A_est_ini[q_j]==0){break}
+        isf[q_j,] = 1-(Dqt[q_j,]-B_est_ini)/A_est_ini[q_j]
         }
       }else{
         isf = matrix(NA,1,1)
       }
 
     l2_est_list = theta_est_l2_dqt_fixedAB(param=param_initial[-length(param_initial)],q=model@q,index_q=index_q_DDM,
-                                           Dqt=Dqt,A_est_q=model@A_est_ini,B_est=model@B_est_ini,
+                                           Dqt=Dqt,A_est_q=A_est_ini,B_est=B_est_ini,
                                            d_input=model@d_input, model_name=model@model_name,
                                            msd_fn=msd_fn,msd_grad_fn=msd_grad_fn)
 
 
     model@param_est = l2_est_list$param_est
     model@msd_est = l2_est_list$msd_est
-    model@sigma_2_0_est = model@B_est_ini/2
+    model@sigma_2_0_est = B_est_ini/2
+    model@A_est = l2_est_list$A_est
     p = NaN
     AIC = NaN
     model@mle = NaN
@@ -527,21 +541,21 @@ SAM <- function(intensity=NA,intensity_str="T_SS_mat",pxsz=1,sz=c(NA,NA),mindt=1
     if(output_isf==TRUE){
       isf = matrix(NA,model@len_q,model@len_t-1)
       for (q_j in 1:model@len_q){
-        if(model@A_est_ini[q_j]==0){break}
-        isf[q_j,] = 1-(Dqt[q_j,]-model@B_est_ini)/model@A_est_ini[q_j]
+        if(A_est_ini[q_j]==0){break}
+        isf[q_j,] = 1-(Dqt[q_j,]-B_est_ini)/A_est_ini[q_j]
       }
     }else{
       isf = matrix(NA,1,1)
     }
 
     l2_est_list = theta_est_l2_dqt_estAB(param=param_initial,q=model@q,index_q=index_q_DDM,
-                                         Dqt=Dqt,A_ini=model@A_est_ini,d_input=model@d_input,
+                                         Dqt=Dqt,A_ini=A_est_ini,d_input=model@d_input,
                                          model_name=model@model_name,msd_fn=msd_fn,msd_grad_fn=msd_grad_fn)
 
     model@param_est = l2_est_list$param_est
     model@msd_est = l2_est_list$msd_est
     model@sigma_2_0_est = l2_est_list$sigma_2_0_est
-    A_est = l2_est_list$A_est
+    model@A_est = l2_est_list$A_est
     p = NaN
     AIC = NaN
     model@mle = NaN
@@ -567,8 +581,8 @@ SAM <- function(intensity=NA,intensity_str="T_SS_mat",pxsz=1,sz=c(NA,NA),mindt=1
     for(q_j in 1:model@len_q){
       q_selected = model@q[q_j]
       model@modeled_ISF[q_j,] = exp(-q_selected^2*model@msd_est[-1]/4)
-      if(model@A_est_ini[q_j]==0){break}
-      model@modeled_Dqt[q_j,] = model@A_est_ini[q_j]*(1-model@modeled_ISF[q_j,])+model@sigma_2_0_est*2
+      if(A_est_ini[q_j]==0){break}
+      model@modeled_Dqt[q_j,] = A_est_ini[q_j]*(1-model@modeled_ISF[q_j,])+model@sigma_2_0_est*2
     }
 
   }

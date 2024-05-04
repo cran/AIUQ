@@ -70,8 +70,6 @@ methods::setClass("SAM", representation(
   len_q = "integer",
   q = "vector",
   d_input = "vector",
-  B_est_ini = "numeric",
-  A_est_ini = "vector",
   #num_q_max = "numeric",
   I_o_q_2_ori = "vector",
   q_ori_ring_loc_unique_index = "list",
@@ -94,8 +92,10 @@ methods::setClass("SAM", representation(
   mle = "numeric",
   param_uq_range = "matrix",
   modeled_Dqt = "matrix",
-  modeled_ISF = "matrix"
-  #p = "numeric"
+  modeled_ISF = "matrix",
+  #p = "numeric",
+  B_est = "numeric",
+  A_est = "vector"
 )
 )
 

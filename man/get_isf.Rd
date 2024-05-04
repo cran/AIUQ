@@ -4,12 +4,14 @@
 \alias{get_isf}
 \title{Compute empirical intermediate scattering function}
 \usage{
-get_isf(object, index_q = NA)
+get_isf(object, index_q = NA, msd_truth = NA)
 }
 \arguments{
 \item{object}{an S4 object of class \code{SAM}}
 
 \item{index_q}{wavevector range used for computing ISF}
+
+\item{msd_truth}{true or reference MSD}
 }
 \value{
 A matrix of empirical intermediate scattering function with dimension

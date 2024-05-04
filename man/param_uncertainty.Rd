@@ -8,6 +8,7 @@ param_uncertainty(
   param_est,
   I_q_cur,
   B_cur = NA,
+  A_neg,
   index_q,
   I_o_q_2_ori,
   q_ori_ring_loc_unique_index,

@@ -8,6 +8,7 @@ log_lik_grad(
   param,
   I_q_cur,
   B_cur,
+  A_neg,
   index_q,
   I_o_q_2_ori,
   d_input,

@@ -26,6 +26,7 @@ SAM(
   index_q_AIUQ = NA,
   index_q_DDM = NA,
   message_out = TRUE,
+  A_neg = "abs",
   square = FALSE,
   output_dqt = FALSE,
   output_isf = FALSE,
@@ -79,7 +80,7 @@ parameter uncertainty should be computed.}
 
 \item{msd_truth}{true MSD or reference MSD value.}
 
-\item{method}{methods for parameter estimation, options from ('AIUQ', 'DDM').}
+\item{method}{methods for parameter estimation, options from ('AIUQ','DDM_fixedAB','DDM_estAB').}
 
 \item{index_q_AIUQ}{index range for wave number when using AIUQ method. See 'Details'.}
 
@@ -87,6 +88,9 @@ parameter uncertainty should be computed.}
 
 \item{message_out}{a logical evaluating to TRUE or FALSE indicating whether
 or not to output the message.}
+
+\item{A_neg}{controls modification for negative A(q), options from  ('abs','zero'),
+with setting negative A(q) to its absolute value as the default.}
 
 \item{square}{a logical evaluating to TRUE or FALSE indicating whether or not
 to crop the original intensity profile into square image.}
@@ -136,9 +140,8 @@ Number of particles \code{M} is set to 50 or automatically extracted from
 \code{simulation} class for simulated data using \code{simulation} in AIUQ
 package.
 
-By default, using all wave vectors from complete q ring for both \code{AIUQ}
-and \code{DDM} method, unless user defined index range through \code{index_q_AIUQ}
-or \code{index_q_DDM}.
+By default, using all wave vectors from complete q ring, unless user defined
+index range through \code{index_q_AIUQ} or \code{index_q_DDM}.
 }
 \examples{
 library(AIUQ)

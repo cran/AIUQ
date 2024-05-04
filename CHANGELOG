@@ -1,2 +1,8 @@
+##change / AIUQ	0.5.2
+ * fixed typo for method name in SAM class
+ * update get_isf function
+ * add argument A_neg in SAM class that controls modification for negative A(q), options from  ('abs','zero'), with absolute value as the default value
+ * output estimated A(q) and B using AIUQ method
+ * change the formal of arXiv to include doi
 ##change / AIUQ 0.5.1
  * implement simulation and estimation of the anisotropic process through aniso_simulation() and aniso_SAM()

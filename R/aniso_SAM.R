@@ -337,8 +337,8 @@ aniso_SAM <- function(intensity=NA,intensity_str="T_SS_mat",pxsz=1, sz=c(NA,NA),
 
   if(sum(is.na(param_initial))>=1){
     param_initial = get_initial_param(model_name=paste(model@model_name,"_anisotropic",sep=""),
-                                        sigma_0_2_ini=sigma_0_2_ini,
-                                        num_param=num_param)
+                                      sigma_0_2_ini=sigma_0_2_ini,
+                                      num_param=num_param)
   }else{
     param_initial = log(c(param_initial,sigma_0_2_ini))
   }
@@ -480,17 +480,17 @@ aniso_SAM <- function(intensity=NA,intensity_str="T_SS_mat",pxsz=1, sz=c(NA,NA),
 
     if(uncertainty==TRUE && is.na(M)!=TRUE){
       param_uq_range=param_uncertainty_anisotropic(param_est=m_param$par,I_q_cur=fft_list$I_q_matrix,
-                                       index_q=index_q_AIUQ,
-                                       I_o_q_2_ori=model@I_o_q_2_ori,
-                                       q_ori_ring_loc_unique_index=q_ori_ring_loc_unique_index,
-                                       sz=model@sz,len_t=model@len_t,
-                                       q1=q1,q2=q2,q1_unique_index=q1_unique_index,
-                                       q2_unique_index=q2_unique_index,
-                                       d_input=model@d_input,
-                                       model_name=paste(model@model_name,"_anisotropic",sep=""),
-                                       M=M,num_iteration_max=num_iteration_max,
-                                       lower_bound=lower_bound,msd_fn=msd_fn,
-                                       msd_grad_fn=msd_grad_fn)
+                                                   index_q=index_q_AIUQ,
+                                                   I_o_q_2_ori=model@I_o_q_2_ori,
+                                                   q_ori_ring_loc_unique_index=q_ori_ring_loc_unique_index,
+                                                   sz=model@sz,len_t=model@len_t,
+                                                   q1=q1,q2=q2,q1_unique_index=q1_unique_index,
+                                                   q2_unique_index=q2_unique_index,
+                                                   d_input=model@d_input,
+                                                   model_name=paste(model@model_name,"_anisotropic",sep=""),
+                                                   M=M,num_iteration_max=num_iteration_max,
+                                                   lower_bound=lower_bound,msd_fn=msd_fn,
+                                                   msd_grad_fn=msd_grad_fn)
 
 
       for(i_p in 1:length(m_param$par)){
@@ -500,8 +500,8 @@ aniso_SAM <- function(intensity=NA,intensity_str="T_SS_mat",pxsz=1, sz=c(NA,NA),
 
       }
       SAM_range_list=get_est_parameters_MSD_SAM_interval_anisotropic(param_uq_range,
-                                                         model_name=model@model_name,
-                                                         d_input=model@d_input, msd_fn=msd_fn)
+                                                                     model_name=model@model_name,
+                                                                     d_input=model@d_input, msd_fn=msd_fn)
       model@uncertainty  = uncertainty
       model@msd_x_lower = SAM_range_list$MSD_x_lower
       model@msd_x_upper = SAM_range_list$MSD_x_upper

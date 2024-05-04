@@ -4,12 +4,14 @@
 \alias{modeled_dqt}
 \title{Compute modeled dynamic image structure function}
 \usage{
-modeled_dqt(object, index_q = NA)
+modeled_dqt(object, index_q = NA, uncertainty = FALSE)
 }
 \arguments{
 \item{object}{an S4 object of class \code{SAM}}
 
 \item{index_q}{wavevector range used for computing Dqt}
+
+\item{uncertainty}{logic evalution}
 }
 \value{
 A matrix of modeled dynamic image structure function with dimension

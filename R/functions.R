@@ -1002,17 +1002,17 @@ get_est_parameters_MSD_SAM_interval_anisotropic <- function(param_uq_range,model
                            rho_y_upper,amplitude_y_upper,beta_y_upper,alpha_y_upper,sigma_2_0_est_upper);
 
   }else if(model_name=='user_defined'){
-      theta_x_lower=theta[1,]
-      theta_x_upper=theta[2,]
-      theta_y_lower=theta[3,]
-      theta_y_upper=theta[4,]
+    theta_x_lower=theta[1,]
+    theta_x_upper=theta[2,]
+    theta_y_lower=theta[3,]
+    theta_y_upper=theta[4,]
 
-      MSD_x_lower=msd_fn(theta_x_lower,d_input)
-      MSD_x_upper=msd_fn(theta_x_upper,d_input)
-      MSD_y_lower=msd_fn(theta_y_lower,d_input)
-      MSD_y_upper=msd_fn(theta_y_upper,d_input)
-      est_parameters_lower=c(theta_x_lower,theta_y_lower,sigma_2_0_est_lower)
-      est_parameters_upper=c(theta_x_upper,theta_y_upper,sigma_2_0_est_upper)
+    MSD_x_lower=msd_fn(theta_x_lower,d_input)
+    MSD_x_upper=msd_fn(theta_x_upper,d_input)
+    MSD_y_lower=msd_fn(theta_y_lower,d_input)
+    MSD_y_upper=msd_fn(theta_y_upper,d_input)
+    est_parameters_lower=c(theta_x_lower,theta_y_lower,sigma_2_0_est_lower)
+    est_parameters_upper=c(theta_x_upper,theta_y_upper,sigma_2_0_est_upper)
 
   }else if(model_name=='VFBM'){
     a_x_lower=theta[1,1]
@@ -1133,7 +1133,7 @@ get_est_parameters_MSD_SAM_interval_anisotropic <- function(param_uq_range,model
 #' @keywords internal
 log_lik <- function(param,I_q_cur,B_cur,index_q,I_o_q_2_ori,d_input,
                     q_ori_ring_loc_unique_index,sz,len_t,q,model_name,
-                    msd_fn=NA,msd_grad_fn=NA){
+                    A_neg,msd_fn=NA,msd_grad_fn=NA){
 
   p=length(param)-1
   theta=exp(param[-(p+1)]) ##first p parameters are parameters in ISF
@@ -1141,8 +1141,12 @@ log_lik <- function(param,I_q_cur,B_cur,index_q,I_o_q_2_ori,d_input,
     sigma_2_0_hat=exp(param[p+1]) ##noise
     B_cur=2*sigma_2_0_hat
   }
-
-  A_cur = abs(2*(I_o_q_2_ori - B_cur/2))
+  if(A_neg=="abs"){
+    A_cur = abs(2*(I_o_q_2_ori - B_cur/2))
+  }else if(A_neg=="zero"){
+    A_cur = 2*(I_o_q_2_ori - B_cur/2)
+    A_cur = ifelse(A_cur>0,A_cur,0)
+  }
 
   ##the model is defined by MSD
   MSD_list = get_MSD_with_grad(theta,d_input,model_name, msd_fn,msd_grad_fn)
@@ -1225,8 +1229,8 @@ log_lik <- function(param,I_q_cur,B_cur,index_q,I_o_q_2_ori,d_input,
 #' 100(18), 188102.
 #' @keywords internal
 anisotropic_log_lik <- function(param,I_q_cur,B_cur,index_q,I_o_q_2_ori,d_input,
-                    q_ori_ring_loc_unique_index,sz,len_t,q1,q2,q1_unique_index,
-                    q2_unique_index,model_name,msd_fn=NA,msd_grad_fn=NA){
+                                q_ori_ring_loc_unique_index,sz,len_t,q1,q2,q1_unique_index,
+                                q2_unique_index,model_name,msd_fn=NA,msd_grad_fn=NA){
 
   p=(length(param)-1)/2
   theta_x=exp(param[1:p]) ##first p parameters are parameters in ISF
@@ -1323,7 +1327,7 @@ anisotropic_log_lik <- function(param,I_q_cur,B_cur,index_q,I_o_q_2_ori,d_input,
 #' wave vector dependent dynamics with a microscope. Physical review letters,
 #' 100(18), 188102.
 #' @keywords internal
-log_lik_grad<-function(param,I_q_cur,B_cur,index_q,I_o_q_2_ori,d_input,
+log_lik_grad<-function(param,I_q_cur,B_cur,A_neg, index_q,I_o_q_2_ori,d_input,
                        q_ori_ring_loc_unique_index,sz,len_t,q,model_name,
                        msd_fn=NA,msd_grad_fn=NA){
   p=length(param)-1
@@ -1332,8 +1336,14 @@ log_lik_grad<-function(param,I_q_cur,B_cur,index_q,I_o_q_2_ori,d_input,
     sigma_2_0_hat=exp(param[p+1]) ##noise
     B_cur=2*sigma_2_0_hat
   }
-  #A_cur = 2*(I_o_q_2_ori - B_cur/2)
-  A_cur = abs(2*(I_o_q_2_ori - B_cur/2))
+
+  if(A_neg=="abs"){
+    A_cur = abs(2*(I_o_q_2_ori - B_cur/2))
+  }else if(A_neg=="zero"){
+    A_cur = 2*(I_o_q_2_ori - B_cur/2)
+    A_cur = ifelse(A_cur>0,A_cur,0)
+  }
+
 
   ##the model is defined by MSD
   MSD_list = get_MSD_with_grad(theta,d_input,model_name, msd_fn,msd_grad_fn)
@@ -1445,8 +1455,8 @@ log_lik_grad<-function(param,I_q_cur,B_cur,index_q,I_o_q_2_ori,d_input,
 #' 100(18), 188102.
 #' @keywords internal
 anisotropic_log_lik_grad<-function(param,I_q_cur,B_cur,index_q,I_o_q_2_ori,d_input,
-                       q_ori_ring_loc_unique_index,sz,len_t,model_name,q1,q2,
-                       q1_unique_index,q2_unique_index,msd_fn=NA,msd_grad_fn=NA){
+                                   q_ori_ring_loc_unique_index,sz,len_t,model_name,q1,q2,
+                                   q1_unique_index,q2_unique_index,msd_fn=NA,msd_grad_fn=NA){
   p=(length(param)-1)/2
   theta_x=exp(param[1:p])
   theta_y=exp(param[(p+1):(2*p)])
@@ -1516,7 +1526,7 @@ anisotropic_log_lik_grad<-function(param,I_q_cur,B_cur,index_q,I_o_q_2_ori,d_inp
 
         trace_terms[i_p]= trace_terms[i_p]+n_q*NTz$trace_grad(as.numeric(acf_grad[,i_p]))
 
-      #n_q*sum(diag(solve(NTz,  toeplitz(as.numeric(acf_grad[,i_p])))))
+        #n_q*sum(diag(solve(NTz,  toeplitz(as.numeric(acf_grad[,i_p])))))
       }
       for(i_p in (p+1):(2*p)){
         acf_grad[,i_p]=-acf0/2*(q2_zero_included[q2_unique_index_selected]^2*MSD_grad_y[,(i_p-p)]*grad_trans_y[(i_p-p)])
@@ -1598,8 +1608,8 @@ get_initial_param <- function(model_name,sigma_0_2_ini=NA, num_param=NA){
     param_initial = matrix(NA,1,(num_param+1)) #include B
     param_initial[1,] = log(c(rep(0.5,num_param),sigma_0_2_ini))
   }else if(model_name=='VFBM_anisotropic'){
-      param_initial=matrix(NA,1,9) #include B
-      param_initial[1,]=log(c(rep(0.1,8),sigma_0_2_ini))#method='L-BFGS-B'
+    param_initial=matrix(NA,1,9) #include B
+    param_initial[1,]=log(c(rep(0.1,8),sigma_0_2_ini))#method='L-BFGS-B'
   }else if(model_name=='BM_anisotropic'){
     param_initial=matrix(NA,1,3) #include B
     param_initial[1,]=log(c(1,1,sigma_0_2_ini))#method='L-BFGS-B',
@@ -1726,7 +1736,7 @@ get_grad_trans<-function(theta,d_input,model_name){
 #' wave vector dependent dynamics with a microscope. Physical review letters,
 #' 100(18), 188102.
 #' @keywords internal
-param_uncertainty<-function(param_est,I_q_cur,B_cur=NA,index_q,
+param_uncertainty<-function(param_est,I_q_cur,B_cur=NA,A_neg,index_q,
                             I_o_q_2_ori,q_ori_ring_loc_unique_index,
                             sz,len_t,d_input,q,model_name,
                             estimation_method='asymptotic',M,
@@ -1738,9 +1748,11 @@ param_uncertainty<-function(param_est,I_q_cur,B_cur=NA,index_q,
     if(is.function(msd_grad_fn)==T){
       gr = log_lik_grad
     }else{gr = NULL}
+  }else if(A_neg=="zero"){
+    gr = NULL
   }else{gr = log_lik_grad}
   #param_ini=param_est
-  m_param_lower = try(optim(param_est,log_lik,gr = gr,I_q_cur=I_q_cur,B_cur=NA,
+  m_param_lower = try(optim(param_est,log_lik,gr = gr,I_q_cur=I_q_cur,B_cur=NA,A_neg=A_neg,
                             index_q=index_q,I_o_q_2_ori=I_o_q_2_ori,
                             q_ori_ring_loc_unique_index=q_ori_ring_loc_unique_index,
                             method='L-BFGS-B',lower=lower_bound,
@@ -1753,7 +1765,7 @@ param_uncertainty<-function(param_est,I_q_cur,B_cur=NA,index_q,
   if(class(m_param_lower)[1]=="try-error"){
     compute_twice=T
     m_param_lower = try(optim(param_est+c(rep(0.5,p),0),log_lik,gr=gr,
-                              I_q_cur=I_q_cur,B_cur=NA,
+                              I_q_cur=I_q_cur,B_cur=NA,A_neg=A_neg,
                               index_q=index_q,I_o_q_2_ori=I_o_q_2_ori,
                               q_ori_ring_loc_unique_index=q_ori_ring_loc_unique_index,
                               method='L-BFGS-B',lower=lower_bound,
@@ -1766,7 +1778,7 @@ param_uncertainty<-function(param_est,I_q_cur,B_cur=NA,index_q,
   q_upper=q+min(q)
 
   m_param_upper = try(optim(param_est,log_lik,gr=gr,
-                            I_q_cur=I_q_cur,B_cur=NA,
+                            I_q_cur=I_q_cur,B_cur=NA,A_neg=A_neg,
                             index_q=index_q,I_o_q_2_ori=I_o_q_2_ori,
                             q_ori_ring_loc_unique_index=q_ori_ring_loc_unique_index,
                             method='L-BFGS-B',lower=lower_bound,
@@ -1778,7 +1790,20 @@ param_uncertainty<-function(param_est,I_q_cur,B_cur=NA,index_q,
   if(class(m_param_upper)[1]=="try-error"){
     compute_twice = T
     m_param_upper = try(optim(param_est+c(rep(0.5,p),0),log_lik,gr=gr,
-                              I_q_cur=I_q_cur,B_cur=NA,
+                              I_q_cur=I_q_cur,B_cur=NA,A_neg=A_neg,
+                              index_q=index_q,I_o_q_2_ori=I_o_q_2_ori,
+                              q_ori_ring_loc_unique_index=q_ori_ring_loc_unique_index,
+                              method='L-BFGS-B',lower=lower_bound,
+                              control = list(fnscale=-1,maxit=num_iteration_max),
+                              sz=sz,len_t=len_t,d_input=d_input,q=q_upper,
+                              model_name=model_name,msd_fn=msd_fn,
+                              msd_grad_fn=msd_grad_fn),TRUE)
+  }
+
+  if(class(m_param_upper)[1]=="try-error"){
+    compute_twice = T
+    m_param_upper = try(optim(param_est+c(rep(0.5,p),0),log_lik,gr=NULL,
+                              I_q_cur=I_q_cur,B_cur=NA,A_neg=A_neg,
                               index_q=index_q,I_o_q_2_ori=I_o_q_2_ori,
                               q_ori_ring_loc_unique_index=q_ori_ring_loc_unique_index,
                               method='L-BFGS-B',lower=lower_bound,
@@ -1803,7 +1828,16 @@ param_uncertainty<-function(param_est,I_q_cur,B_cur=NA,index_q,
       B_cur = 2*sigma_2_0_hat
     }
 
-    A_cur = abs(2*(I_o_q_2_ori - B_cur/2))
+    if(A_neg=="abs"){
+      A_cur = abs(2*(I_o_q_2_ori - B_cur/2))
+      selected_index_q = index_q
+    }else if(A_neg=="zero"){
+      A_cur = 2*(I_o_q_2_ori - B_cur/2)
+      A_cur = ifelse(A_cur>0,A_cur,0)
+      selected_index_q = which(A_cur[index_q]>0)
+      selected_index_q = index_q[selected_index_q]
+    }
+
     eta = B_cur/4 ##nugget
 
     MSD_list = get_MSD_with_grad(theta,d_input,model_name,msd_fn,msd_grad_fn)
@@ -1811,10 +1845,10 @@ param_uncertainty<-function(param_est,I_q_cur,B_cur=NA,index_q,
     MSD_grad = MSD_list$msd_grad
 
     grad_trans = get_grad_trans(theta,d_input,model_name)
-    Hessian_list = as.list(index_q)
+    Hessian_list = as.list(selected_index_q)
     Hessian_sum = 0
 
-    for(i_q_selected in index_q){
+    for(i_q_selected in selected_index_q){
       q_selected=q[i_q_selected]
 
       sigma_2=A_cur[i_q_selected]/4
@@ -1847,7 +1881,7 @@ param_uncertainty<-function(param_est,I_q_cur,B_cur=NA,index_q,
       #Hessian_sum=Hessian_sum+Hessian
     }
 
-    Hessian_sum = Hessian_sum*M/sum(lengths(q_ori_ring_loc_unique_index[index_q]))
+    Hessian_sum = Hessian_sum*M/sum(lengths(q_ori_ring_loc_unique_index[selected_index_q]))
     if(kappa(Hessian_sum)>1e10){
       epsilon <- 1e-6
       Hessian_sum <- Hessian_sum + epsilon * diag(ncol(Hessian_sum))
@@ -1913,11 +1947,11 @@ param_uncertainty<-function(param_est,I_q_cur,B_cur=NA,index_q,
 #' 100(18), 188102.
 #' @keywords internal
 param_uncertainty_anisotropic<-function(param_est,I_q_cur,B_cur=NA,index_q,
-                            I_o_q_2_ori,q_ori_ring_loc_unique_index,
-                            sz,len_t,d_input,q1,q2,q1_unique_index,q2_unique_index,
-                            model_name,estimation_method='asymptotic',M,
-                            num_iteration_max,lower_bound,msd_fn=NA,
-                            msd_grad_fn=NA){
+                                        I_o_q_2_ori,q_ori_ring_loc_unique_index,
+                                        sz,len_t,d_input,q1,q2,q1_unique_index,q2_unique_index,
+                                        model_name,estimation_method='asymptotic',M,
+                                        num_iteration_max,lower_bound,msd_fn=NA,
+                                        msd_grad_fn=NA){
   p=(length(param_est)-1)/2
   q1_lower=q1-min(q1)
   q2_lower=q2-min(q2)
@@ -2258,7 +2292,7 @@ anisotropic_ou_particle_intensity <- function(pos0,M,len_t,sigma,rho){
 corr_fBM <- function(len_t,H){
   cov = matrix(NA, len_t-1, len_t-1)
   for(i in 0:(len_t-2)){
-  cov[i+1,] = 0.5*(abs(i-(0:(len_t-2))+1)^(2*H))+0.5*(abs(1-i+(0:(len_t-2)))^(2*H))-abs(i-(0:(len_t-2)))^(2*H)
+    cov[i+1,] = 0.5*(abs(i-(0:(len_t-2))+1)^(2*H))+0.5*(abs(1-i+(0:(len_t-2)))^(2*H))-abs(i-(0:(len_t-2)))^(2*H)
   }
   return(cov)
 }
@@ -2669,7 +2703,7 @@ anisotropic_numerical_msd <- function(pos, M,len_t){
     if (length(dim(mean_square_y))>1){
       msd_y_i[,dt] = apply(mean_square_y,1,function(x){mean(x,na.rm=T)})
     }else{msd_y_i[,dt] = mean_square_y}
-    }
+  }
   #result_list = list()
   num_msd_mean[-1,1] = apply(msd_x_i,2,function(x){mean(x,na.rm=T)})
   num_msd_mean[-1,2] = apply(msd_y_i,2,function(x){mean(x,na.rm=T)})
@@ -2703,7 +2737,7 @@ plot_traj<- function(object, title=NA){
       }else if(class(object)[1]=="aniso_simulation"){
         title=paste("Anisotropic",object@model_name,"with",object@M,"particles")
       }
-      }
+    }
     # highlight start and end point?
     traj1 = object@pos[seq(1,dim(object@pos)[1],by=object@M),]
     # change plot as 0,0 to be the top left corner
@@ -3577,6 +3611,7 @@ get_dqt <- function(object, index_q = NA){
 #'
 #' @param object an S4 object of class \code{SAM}
 #' @param index_q wavevector range used for computing ISF
+#' @param msd_truth true or reference MSD
 #'
 #' @return  A matrix of empirical intermediate scattering function with dimension
 #' \code{len_q} by \code{len_t-1}.
@@ -3602,35 +3637,48 @@ get_dqt <- function(object, index_q = NA){
 #' sam = SAM(sim_object = sim_bm)
 #' show(sam)
 #' ISF = get_isf(object=sam)
-get_isf <- function(object, index_q = NA){
+get_isf <- function(object, index_q = NA,msd_truth=NA){
   if(class(object)[1]=='SAM'){
     len_q = object@len_q
     len_t = object@len_t
-    A_est = object@A_est_ini
-    B_est = object@B_est_ini
-    if(length(index_q)==1 && is.na(index_q)){
-      index_q = 1:len_q
-    }
-
-    if(nrow(object@Dqt)*ncol(object@Dqt)==1 && is.na(object@Dqt)){
-      sz = object@sz
-      Dqt = matrix(NA,len_q,len_t-1)
-      isf = matrix(NA,len_q,len_t-1)
-      for (q_j in index_q){
-        index_cur = object@q_ori_ring_loc_unique_index[[q_j]]
-        I_q_cur = object@I_q[index_cur,]
-        for (t_i in 1:(len_t-1)){
-          Dqt[q_j,t_i]=mean((abs(I_q_cur[,(t_i+1):len_t]-I_q_cur[,1:(len_t-t_i)]))^2/(sz[1]*sz[2]),na.rm=T)
+    q = object@q
+    if(length(msd_truth)==1 && is.na(msd_truth) == TRUE){
+      len_q = object@len_q
+      len_t = object@len_t
+      B_est = object@sigma_2_0_est*2
+      A_est = abs(2*(object@I_o_q_2_ori - B_est/2))
+      if(length(index_q)==1 && is.na(index_q)){
+        index_q = 1:len_q
+      }
+      if(nrow(object@Dqt)*ncol(object@Dqt)==1 && is.na(object@Dqt)){
+        sz = object@sz
+        Dqt = matrix(NA,len_q,len_t-1)
+        isf = matrix(NA,len_q,len_t-1)
+        for (q_j in index_q){
+          index_cur = object@q_ori_ring_loc_unique_index[[q_j]]
+          I_q_cur = object@I_q[index_cur,]
+          for (t_i in 1:(len_t-1)){
+            Dqt[q_j,t_i]=mean((abs(I_q_cur[,(t_i+1):len_t]-I_q_cur[,1:(len_t-t_i)]))^2/(sz[1]*sz[2]),na.rm=T)
+          }
+          if(A_est[q_j]==0){break}
+          isf[q_j,] = 1-(Dqt[q_j,]-B_est)/A_est[q_j]
         }
-        if(A_est[q_j]==0){break}
-        isf[q_j,] = 1-(Dqt[q_j,]-B_est)/A_est[q_j]
+      }else{
+        Dqt = object@Dqt
+        isf = matrix(NA,len_q,len_t-1)
+        for (q_j in index_q){
+          if(A_est[q_j]==0){break}
+          isf[q_j,] = 1-(Dqt[q_j,]-B_est)/A_est[q_j]
+        }
       }
     }else{
-      Dqt = object@Dqt
       isf = matrix(NA,len_q,len_t-1)
-      for (q_j in index_q){
-        if(A_est[q_j]==0){break}
-        isf[q_j,] = 1-(Dqt[q_j,]-B_est)/A_est[q_j]
+      if(length(index_q)==1 && is.na(index_q)){
+        index_q = 1:len_q
+      }
+      for(q_j in index_q){
+        q_selected = q[q_j]
+        isf[q_j,] = exp(-q_selected^2*msd_truth/4)
       }
     }
     return(isf)
@@ -3694,6 +3742,7 @@ modeled_isf <- function(object, index_q=NA){
 #'
 #' @param object an S4 object of class \code{SAM}
 #' @param index_q wavevector range used for computing Dqt
+#' @param uncertainty logic evalution
 #'
 #' @return  A matrix of modeled dynamic image structure function with dimension
 #' \code{len_q} by \code{len_t-1}.
@@ -3719,35 +3768,64 @@ modeled_isf <- function(object, index_q=NA){
 #' sam = SAM(sim_object = sim_bm)
 #' show(sam)
 #' modeled_Dqt = modeled_dqt(object=sam)
-modeled_dqt <- function(object, index_q = NA){
+modeled_dqt <- function(object, index_q = NA, uncertainty=FALSE){
   if(class(object)[1]=='SAM'){
     len_q = object@len_q
     len_t = object@len_t
-    A_est = object@A_est_ini
     B_est = object@sigma_2_0_est*2
+    A_est = abs(2*(object@I_o_q_2_ori - B_est/2))
     q = object@q
     msd_est = object@msd_est[-1]
+    msd_est_upper = object@msd_upper
+    msd_est_lower = object@msd_lower
     if(length(index_q)==1 && is.na(index_q)){
       index_q = 1:len_q
     }
-    if(nrow(object@modeled_ISF)*ncol(object@modeled_ISF)==1 && is.na(object@modeled_ISF)){
-      isf = matrix(NA,len_q,len_t-1)
+    if(uncertainty==FALSE){
+      if(nrow(object@modeled_ISF)*ncol(object@modeled_ISF)==1 && is.na(object@modeled_ISF)){
+        isf = matrix(NA,len_q,len_t-1)
+        Dqt = matrix(NA,len_q,len_t-1)
+        for(q_j in index_q){
+          q_selected = q[q_j]
+          isf[q_j,] = exp(-q_selected^2*msd_est/4)
+          if(A_est[q_j]==0){break}
+          Dqt[q_j,] = A_est[q_j]*(1-isf[q_j,])+B_est
+        }
+      }else{
+        isf = object@modeled_ISF
+        Dqt = matrix(NA,len_q,len_t-1)
+        for (q_j in index_q){
+          if(A_est[q_j]==0){break}
+          Dqt[q_j,] = A_est[q_j]*(1-isf[q_j,])+B_est
+        }
+      }
+    }else if(uncertainty==TRUE & length(msd_est_upper)>1){
+      msd_est_upper = msd_est_upper[-1]
+      msd_est_lower = msd_est_lower[-1]
       dqt = matrix(NA,len_q,len_t-1)
+      dqt_upper = matrix(NA,len_q,len_t-1)
+      dqt_lower = matrix(NA,len_q,len_t-1)
+      isf = matrix(NA,len_q,len_t-1)
+      isf_upper = matrix(NA,len_q,len_t-1)
+      isf_lower = matrix(NA,len_q,len_t-1)
       for(q_j in index_q){
         q_selected = q[q_j]
         isf[q_j,] = exp(-q_selected^2*msd_est/4)
+        isf_upper[q_j,] = exp(-q_selected^2*msd_est_upper/4)
+        isf_lower[q_j,] = exp(-q_selected^2*msd_est_lower/4)
         if(A_est[q_j]==0){break}
         dqt[q_j,] = A_est[q_j]*(1-isf[q_j,])+B_est
+        dqt_upper[q_j,] = A_est[q_j]*(1-isf_upper[q_j,])+B_est
+        dqt_lower[q_j,] = A_est[q_j]*(1-isf_lower[q_j,])+B_est
       }
-    }else{
-      isf = object@modeled_ISF
-      dqt = matrix(NA,len_q,len_t-1)
-      for (q_j in index_q){
-        if(A_est[q_j]==0){break}
-        dqt[q_j,] = A_est[q_j]*(1-isf[q_j,])+B_est
-      }
-    }
-    return(dqt)
+      Dqt = vector(mode = "list")
+      Dqt[["dqt"]]=dqt
+      Dqt[["dqt_upper"]]=dqt_upper
+      Dqt[["dqt_lower"]]=dqt_lower
+    }else if(uncertainty==TRUE & length(msd_est_upper)==1){
+      stop("Please input an SAM class with 'uncertainty=T'. \n")}
+
+    return(Dqt)
   }else{stop("Please input an SAM class. \n")}
 }
 

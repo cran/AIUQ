@@ -80,7 +80,7 @@ simulation <- function(sz=c(200,200), len_t=200, M=50, model_name="BM",noise="ga
   if(!is.character(model_name)){
     stop("Type of stochastic process should be a character value. \n")
   }
-    if(model_name!="BM" && model_name!="OU" && model_name!="FBM" && model_name!="OU+FBM"){
+  if(model_name!="BM" && model_name!="OU" && model_name!="FBM" && model_name!="OU+FBM"){
     stop("Type of stochastic process should be one of the type listed in help page. \n")
   }
   if(!is.character(noise)){

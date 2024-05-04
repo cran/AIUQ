@@ -7,11 +7,11 @@
 FFT2D(intensity_list, pxsz, mindt)
 }
 \arguments{
+\item{intensity_list}{intensity profile, SS_T matrix}
+
 \item{pxsz}{size of one pixel in unit of micron}
 
 \item{mindt}{minimum lag time}
-
-\item{intensity_list}{a list of intensity profile containing sz_x, sz_y and intensity, an SS_T matrix}
 }
 \value{
 A list object containing transformed intensity profile in reciprocal

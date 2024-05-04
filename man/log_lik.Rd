@@ -16,6 +16,7 @@ log_lik(
   len_t,
   q,
   model_name,
+  A_neg,
   msd_fn = NA,
   msd_grad_fn = NA
 )
