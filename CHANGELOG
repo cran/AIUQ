@@ -1,3 +1,9 @@
+##change / AIUQ 0.5.3
+ * change the output issue of the method 'DDM_fixedAB'
+ * add argument A_neg for DDM methods that controls modification for negative A(q)
+ * add a package vignette
+ * add AIUQ-package.Rd
+
 ##change / AIUQ	0.5.2
  * fixed typo for method name in SAM class
  * update get_isf function

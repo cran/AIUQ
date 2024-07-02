@@ -6,6 +6,7 @@
 NULL
 #> NULL
 #' @keywords internal
+"_PACKAGE"
 
 
 

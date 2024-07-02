@@ -22,12 +22,14 @@ Compute empirical intermediate scattering function (ISF) using object of
 \code{SAM} class.
 }
 \examples{
+\dontrun{
 library(AIUQ)
 sim_bm = simulation(len_t=100,sz=100,sigma_bm=0.5)
 show(sim_bm)
 sam = SAM(sim_object = sim_bm)
 show(sam)
 ISF = get_isf(object=sam)
+}
 }
 \references{
 Gu, M., He, Y., Liu, X., & Luo, Y. (2023). Ab initio uncertainty

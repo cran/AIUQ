@@ -3499,9 +3499,10 @@ theta_est_l2_dqt_estAB<- function(param,A_ini,q,index_q,Dqt,d_input,
 
   param_est_l2 = matrix(nrow=length(q),ncol=length(param)+1)
   for(q_j in index_q){
-    param_start=c(param,log(abs(A_ini[q_j])))
-    if(q_j==length(q)){
-      param_start=c(param,0)
+    if (A_ini[q_j]==0){
+        param_start=c(param,0)
+    }else{
+        param_start=c(param,log(abs(A_ini[q_j])))
     }
     m_optim=try(optim(param_start,l2_estAB,Dqt_cur=Dqt[q_j,],d_input=d_input,
                       q_cur=q[q_j],model_name=model_name,msd_fn=msd_fn,

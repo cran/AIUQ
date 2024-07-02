@@ -507,6 +507,12 @@ SAM <- function(intensity=NA,intensity_str="T_SS_mat",pxsz=1,sz=c(NA,NA),mindt=1
     Dqt = SAM_Dqt(len_q=model@len_q,index_q=index_q_DDM,len_t=model@len_t,
                   I_q_matrix=fft_list$I_q_matrix,sz=model@sz,
                   q_ori_ring_loc_unique_index=q_ori_ring_loc_unique_index)
+    if(A_neg=="abs"){
+        A_est_ini = abs(A_est_ini)
+    }else if(A_neg=="zero"){
+        A_est_ini = ifelse(A_est_ini>0,A_est_ini,0)
+    }
+                      
     if(output_isf==TRUE){
       isf = matrix(NA,model@len_q,model@len_t-1)
       for (q_j in 1:model@len_q){
@@ -526,7 +532,9 @@ SAM <- function(intensity=NA,intensity_str="T_SS_mat",pxsz=1,sz=c(NA,NA),mindt=1
     model@param_est = l2_est_list$param_est
     model@msd_est = l2_est_list$msd_est
     model@sigma_2_0_est = B_est_ini/2
-    model@A_est = l2_est_list$A_est
+    #model@A_est = l2_est_list$A_est
+    model@A_est=A_est_ini
+    
     p = NaN
     AIC = NaN
     model@mle = NaN
@@ -538,6 +546,12 @@ SAM <- function(intensity=NA,intensity_str="T_SS_mat",pxsz=1,sz=c(NA,NA),mindt=1
     Dqt = SAM_Dqt(len_q=model@len_q,index_q=index_q_DDM,len_t=model@len_t,
                   I_q_matrix=fft_list$I_q_matrix,sz=model@sz,
                   q_ori_ring_loc_unique_index=q_ori_ring_loc_unique_index)
+    if(A_neg=="abs"){
+        A_est_ini = abs(A_est_ini)
+    }else if(A_neg=="zero"){
+        A_est_ini = ifelse(A_est_ini>0,A_est_ini,0)
+    }
+                      
     if(output_isf==TRUE){
       isf = matrix(NA,model@len_q,model@len_t-1)
       for (q_j in 1:model@len_q){
