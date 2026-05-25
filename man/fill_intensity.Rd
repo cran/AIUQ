@@ -22,19 +22,19 @@ fill_intensity(len_t, M, I, pos, Ic, sz, sigma_p)
 \item{sigma_p}{radius of the spherical particle (3sigma_p)}
 }
 \value{
-Intensity profile matrix with structure 'T_SS_mat' (matrix with
-dimension \code{len_t} by \code{sz}\eqn{\times}{\%\times}\code{sz}).
+Intensity profile matrix with structure "T_SS_mat" (matrix with
+dimension \code{len_t} by \code{sz x sz}).
 }
 \description{
 Construct intensity profile with structure 'T_SS_mat' for a given particle
 trajectory, background intensity profile, and user defined radius of particle.
 }
 \details{
-Input \code{I} should has structure 'T_SS_mat', matrix with dimension
-\code{len_t} by \code{sz}\eqn{\times}{\%\times}\code{sz}.
+Input \code{I} should has structure "T_SS_mat", matrix with dimension
+\code{len_t} by \code{sz x sz}.
 
 Input \code{pos} should be the position matrix with dimension
-\code{M}\eqn{\times}{\%\times}\code{len_t}. See \code{\link{bm_particle_intensity}},
+\code{M x len_t}. See \code{\link{bm_particle_intensity}},
 \code{\link{ou_particle_intensity}}, \code{\link{fbm_particle_intensity}},
 \code{\link{fbm_ou_particle_intensity}}.
 }

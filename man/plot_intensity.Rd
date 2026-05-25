@@ -37,13 +37,13 @@ Function to plot 2D intensity profile for a certain frame, default is to plot
 the first frame. Input can be a matrix (2D) or an array (3D).
 }
 \details{
-By default \code{intensity_str} is set to 'T_SS_mat', a time by space\eqn{\times}{\%\times}space
+By default \code{intensity_str} is set to "T_SS_mat", a time by space x space
 matrix, which is the structure of intensity profile obtained from \code{simulation}
-class. For \code{intensity_str='SST_array'} , input intensity profile should be a
+class. For \code{intensity_str="SST_array"} , input intensity profile should be a
 space by space by time array, which is the structure from loading a tif file.
-For \code{intensity_str='S_ST_mat'}, input intensity profile should be a
-space by space\eqn{\times}{\%\times}time matrix. For \code{intensity_str='SS_T_mat'},
-input intensity profile should be a space\eqn{\times}{\%\times}space by time matrix.
+For \code{intensity_str="S_ST_mat"}, input intensity profile should be a
+space by space x time matrix. For \code{intensity_str="SS_T_mat"},
+input intensity profile should be a space x space by time matrix.
 }
 \examples{
 library(AIUQ)

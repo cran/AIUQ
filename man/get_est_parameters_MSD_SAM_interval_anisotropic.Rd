@@ -12,11 +12,11 @@ get_est_parameters_MSD_SAM_interval_anisotropic(
 )
 }
 \arguments{
-\item{param_uq_range}{lower and upper bound for natural logorithm of
+\item{param_uq_range}{lower and upper bound for natural logarithm of
 parameters in the fitted model using \code{AIUQ} method in \code{aniso_SAM} class}
 
-\item{model_name}{model for constructing MSD, options from ('BM','OU',
-'FBM','OU+FBM', 'user_defined')}
+\item{model_name}{model for constructing MSD, options are \code{"BM"},
+\code{"OU"}, \code{"FBM"}, \code{"OU+FBM"}, and \code{"user_defined"}.}
 
 \item{d_input}{sequence of lag times}
 
@@ -28,9 +28,9 @@ A list of lower and upper bound for 95\% confidence interval
 of estimated parameters and MSD for a given model.
 }
 \description{
-This function construct the lower and upper bound for 95\% confidence interval
-of estimated parameters and mean squared displacement(MSD) for a given
-anisotropic model. See 'References'.
+This function constructs the lower and upper bound for 95\% confidence interval
+of estimated parameters and mean squared displacement (MSD) for a given
+anisotropic model. See "References".
 }
 \references{
 Gu, M., He, Y., Liu, X., & Luo, Y. (2023). Ab initio uncertainty

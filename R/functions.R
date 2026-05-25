@@ -333,21 +333,21 @@ fftshift <- function(x, dim = -1) {
 #' @details
 #' Note for non \code{user_defined} model, \code{msd_fn} and \code{msd_grad_fn}
 #' are not needed. For Brownian Motion, the MSD follows
-#' \deqn{MSD_{BM}(\Delta t) = \theta_1\Delta t= 4D\Delta t}{%MSD_{BM}(\Delta t) = \theta_1\Delta t= 4D\Delta t}
+#' \deqn{MSD_{BM}(\Delta t) = \theta_1\Delta t= 4D\Delta t}{MSD_BM(Delta t) = theta_1 Delta t = 4 D Delta t}
 #' where \code{D} is the diffusion coefficient.
 #'
 #' For Ornstein–Uhlenbeck process,  the MSD follows
-#' \deqn{MSD_{OU}(\Delta t) = \theta_2(1-\frac{\theta_1}{1+\theta_1}^{\Delta t})}{%MSD_{OU}(\Delta t) = \theta_2(1-\frac{\theta_1}{1+\theta_1}^{\Delta t})}
-#' where \eqn{\frac{\theta_1}{1+\theta_1}=\rho}{%\frac{\theta_1}{1+\theta_1}=\rho}
+#' \deqn{MSD_{OU}(\Delta t) = \theta_2 \left(1 - \left(\frac{\theta_1}{1+\theta_1}\right)^{\Delta t}\right)}{MSD_OU(Delta t) = theta_2 * (1 - (theta_1 / (1 + theta_1))^(Delta t))}
+#' where \eqn{\frac{\theta_1}{1+\theta_1} = \rho}{theta_1 / (1 + theta_1) = rho}.
 #' is the correlation with previous steps.
 #'
 #' For fractional Brownian Motion,  the MSD follows
-#' \deqn{MSD_{FBM}(\Delta t) =\theta_1\Delta t^{\frac{2\theta_2}{1+\theta_2}}}{%MSD_{FBM}(\Delta t) =\theta_1\Delta t^{\frac{2\theta_2}{1+\theta_2}}}
-#' where \eqn{\frac{2\theta_2}{1+\theta_2}=2H}{%\frac{2\theta_2}{1+\theta_2}=2H}
+#' \deqn{MSD_{FBM}(\Delta t) =\theta_1\Delta t^{\frac{2\theta_2}{1+\theta_2}}}{MSD_FBM(Delta t) = theta_1 * Delta t^(2 theta_2 / (1 + theta_2))}
+#' where \eqn{\frac{2\theta_2}{1+\theta_2}=2H}{2 * theta_2 / (1 + theta_2) = 2H}
 #' with \code{H} is the the Hurst parameter.
 #'
 #' For 'OU+FBM', the MSD follows
-#' \deqn{MSD_{OU+FBM}(\Delta t) = \theta_2(1-\frac{\theta_1}{1+\theta_1}^{\Delta t})+\theta_3\Delta t^{\frac{2\theta_4}{1+\theta_4}}}{%MSD_{OU+FBM}(\Delta t) = \theta_2(1-\frac{\theta_1}{1+\theta_1}^{\Delta t})+\theta_3\Delta t^{\frac{2\theta_4}{1+\theta_4}}}
+#' \deqn{MSD_{OU+FBM}(\Delta t) = \theta_2(1-\frac{\theta_1}{1+\theta_1}^{\Delta t})+\theta_3\Delta t^{\frac{2\theta_4}{1+\theta_4}}}{MSD_OU+FBM(Delta t) = theta_2 * (1 - (theta_1 / (1 + theta_1))^(Delta t)) + theta_3 * Delta t^(2 * theta_4 / (1 + theta_4))} 
 #'
 #' @export
 #' @author \packageAuthor{AIUQ}
@@ -468,8 +468,8 @@ get_true_param_sim<-function(param_truth,model_name){
   }else if(model_name=='OU+FBM'){
     rho = param_truth[1]
     amplitude = 4*param_truth[2]^2
-    beta = 2*param_truth[1]^2
-    alpha = 2*param_truth[2]
+    beta = 2*param_truth[3]^2
+    alpha = 2*param_truth[4]
     param = c(rho,amplitude,beta,alpha)
   }
   return(param)
@@ -590,20 +590,20 @@ get_est_param<-function(theta,model_name){
 #' @return A vector of MSD values for a given sequence of lag times.
 #' @details
 #' For Brownian Motion, the MSD follows
-#' \deqn{MSD_{BM}(\Delta t) = \theta_1\Delta t= 4D\Delta t}{%MSD_{BM}(\Delta t) = \theta_1\Delta t= 4D\Delta t}
+#' \deqn{MSD_{BM}(\Delta t) = \theta_1\Delta t= 4D\Delta t}{MSD_BM(Delta t) = theta_1 * Delta t = 4 * D * Delta t}
 #' where \code{D} is the diffusion coefficient.
 #'
 #' For Ornstein–Uhlenbeck process,  the MSD follows
-#' \deqn{MSD_{OU}(\Delta t) = \theta_2(1-\theta_1^{\Delta t})}{%MSD_{OU}(\Delta t) = \theta_2(1-\theta_1^{\Delta t})}
-#' where \eqn{\theta_1=\rho}{%\theta_1=\rho}
+#' \deqn{MSD_{OU}(\Delta t) = \theta_2(1-\theta_1^{\Delta t})}{MSD_OU(Delta t) = theta_2 * (1 - theta_1^(Delta t))}
+#' where \eqn{\theta_1=\rho}{theta_1 = rho}
 #' is the correlation with previous steps.
 #'
 #' For fractional Brownian Motion,  the MSD follows
-#' \deqn{MSD_{FBM}(\Delta t) =\theta_1\Delta t^{\theta_2}}{%MSD_{FBM}(\Delta t) =\theta_1\Delta t^{\theta_2}}
-#' where \eqn{\theta_2=2H}{%\theta_2=2H} with \code{H} is the the Hurst parameter.
+#' \deqn{MSD_{FBM}(\Delta t) =\theta_1\Delta t^{\theta_2}}{MSD_FBM(Delta t) = theta_1 * Delta t^(theta_2)}
+#' where \eqn{\theta_2=2H}{theta_2 = 2H} with \code{H} is the the Hurst parameter.
 #'
 #' For 'OU+FBM', the MSD follows
-#' \deqn{MSD_{OU+FBM}(\Delta t) = \theta_2(1-\theta_1^{\Delta t})+\theta_3\Delta t^{\theta_4}}{%MSD_{OU+FBM}(\Delta t) = \theta_2(1-\theta_1^{\Delta t})+\theta_3\Delta t^{\theta_4}}
+#' \deqn{MSD_{OU+FBM}(\Delta t) = \theta_2(1-\theta_1^{\Delta t})+\theta_3\Delta t^{\theta_4}}{MSD_OU+FBM(Delta t) = theta_2 * (1 - theta_1^(Delta t)) + theta_3 * Delta t^(theta_4)}
 #'
 #' @export
 #' @author \packageAuthor{AIUQ}
@@ -652,21 +652,21 @@ get_MSD<-function(theta,d_input,model_name, msd_fn=NA){
   return(MSD)
 }
 
-#' Construct 95% confidence interval
+#' Construct 95\% confidence interval
 #' @description
-#' This function construct the lower and upper bound for 95% confidence interval
-#' of estimated parameters and mean squared displacement(MSD) for a given model.
-#' See 'References'.
+#' This function constructs the lower and upper bound for 95\% confidence interval
+#' of estimated parameters and mean squared displacement (MSD) for a given model.
+#' See "References".
 #'
-#' @param param_uq_range lower and upper bound for natural logorithm of
+#' @param param_uq_range lower and upper bound for natural logarithm of
 #' parameters in the fitted model using \code{AIUQ} method in \code{SAM} class
-#' @param model_name model for constructing MSD, options from ('BM','OU',
-#' 'FBM','OU+FBM', 'user_defined')
+#' @param model_name model for constructing MSD, options are \code{"BM"},
+#'   \code{"OU"}, \code{"FBM"}, \code{"OU+FBM"}, and \code{"user_defined"}.
 #' @param d_input sequence of lag times
 #' @param msd_fn user defined mean squared displacement structure (MSD), a
 #' function of \code{param} parameters and \code{d_input} lag times
 #'
-#' @return A list of lower and upper bound for 95% confidence interval
+#' @return A list of lower and upper bound for 95\% confidence interval
 #' of estimated parameters and MSD for a given model.
 #'
 #' @export
@@ -808,21 +808,21 @@ get_est_parameters_MSD_SAM_interval <- function(param_uq_range,model_name,d_inpu
   return(ans_list)
 }
 
-#' Construct 95% confidence interval for anisotropic processes
+#' Construct 95\% confidence interval for anisotropic processes
 #' @description
-#' This function construct the lower and upper bound for 95% confidence interval
-#' of estimated parameters and mean squared displacement(MSD) for a given
-#' anisotropic model. See 'References'.
+#' This function constructs the lower and upper bound for 95\% confidence interval
+#' of estimated parameters and mean squared displacement (MSD) for a given
+#' anisotropic model. See "References".
 #'
-#' @param param_uq_range lower and upper bound for natural logorithm of
+#' @param param_uq_range lower and upper bound for natural logarithm of
 #' parameters in the fitted model using \code{AIUQ} method in \code{aniso_SAM} class
-#' @param model_name model for constructing MSD, options from ('BM','OU',
-#' 'FBM','OU+FBM', 'user_defined')
+#' @param model_name model for constructing MSD, options are \code{"BM"},
+#'   \code{"OU"}, \code{"FBM"}, \code{"OU+FBM"}, and \code{"user_defined"}.
 #' @param d_input sequence of lag times
 #' @param msd_fn user defined mean squared displacement structure (MSD), a
 #' function of \code{param} parameters and \code{d_input} lag times
 #'
-#' @return A list of lower and upper bound for 95% confidence interval
+#' @return A list of lower and upper bound for 95\% confidence interval
 #' of estimated parameters and MSD for a given model.
 #'
 #' @export
@@ -1689,18 +1689,18 @@ get_grad_trans<-function(theta,d_input,model_name){
   return(grad_trans)
 }
 
-#' Compute 95% confidence interval
+#' Compute 95\% confidence interval
 #' @description
-#' This function construct the lower and upper bound for 95% confidence interval
+#' This function constructs the lower and upper bound for 95\% confidence interval
 #' of estimated parameters for the given model, including parameters contained
-#' in the intermediate scattering function and background noise. See 'References'.
+#' in the intermediate scattering function and background noise. See "References".
 #'
 #' @param param_est a vector of natural logarithm of estimated parameters from
 #' maximize the log likelihood. This vector will serve as initial values in the
 #' \code{optim} function.
 #' @param I_q_cur Fourier transformed intensity profile
 #' @param B_cur current value of B. This parameter is determined by the noise
-#' in the system. See 'References'.
+#' in the system. See "References".
 #' @param index_q selected index of wave number
 #' @param I_o_q_2_ori absolute square of Fourier transformed intensity profile,
 #' ensemble over time
@@ -1709,8 +1709,8 @@ get_grad_trans<-function(theta,d_input,model_name){
 #' @param len_t number of time steps
 #' @param q wave vector in unit of um^-1
 #' @param d_input sequence of lag times
-#' @param model_name model name for the fitted model, options from ('BM','OU',
-#' 'FBM',OU+FBM','user_defined')
+#' @param model_name model name for the fitted model, options are \code{"BM"},
+#'   \code{"OU"}, \code{"FBM"}, \code{"OU+FBM"}, and \code{"user_defined"}.
 #' @param estimation_method method for constructing 95% confidence interval,
 #' default is asymptotic
 #' @param M number of particles
@@ -1895,19 +1895,19 @@ param_uncertainty<-function(param_est,I_q_cur,B_cur=NA,A_neg,index_q,
   return(param_range)
 }
 
-#' Compute 95% confidence interval for anisotropic processes
+#' Compute 95\% confidence interval for anisotropic processes
 #' @description
-#' This function construct the lower and upper bound for 95% confidence interval
+#' This function construct the lower and upper bound for 95\% confidence interval
 #' of estimated parameters for the given anisotropic model, including parameters
 #' contained in the intermediate scattering function and background noise.
-#' See 'References'.
+#' See "References".
 #'
 #' @param param_est a vector of natural logarithm of estimated parameters from
 #' maximize the log likelihood. This vector will serve as initial values in the
 #' \code{optim} function.
 #' @param I_q_cur Fourier transformed intensity profile
 #' @param B_cur current value of B. This parameter is determined by the noise
-#' in the system. See 'References'.
+#' in the system. See "References".
 #' @param index_q selected index of wave number
 #' @param I_o_q_2_ori absolute square of Fourier transformed intensity profile,
 #' ensemble over time
@@ -1919,9 +1919,9 @@ param_uncertainty<-function(param_est,I_q_cur,B_cur=NA,A_neg,index_q,
 #' @param q1_unique_index index for wave vector that give unique frequency in x direction
 #' @param q2_unique_index index for wave vector that give unique frequency in y direction
 #' @param d_input sequence of lag times
-#' @param model_name model name for the fitted model, options from ('BM','OU',
-#' 'FBM',OU+FBM','user_defined')
-#' @param estimation_method method for constructing 95% confidence interval,
+#' @param model_name model name for the fitted model, options are \code{"BM"},
+#' \code{"OU"}, \code{"FBM"}, \code{"OU+FBM"}, and \code{"user_defined"}.
+#' @param estimation_method method for constructing 95\% confidence interval,
 #' default is asymptotic
 #' @param M number of particles
 #' @param num_iteration_max the maximum number of iterations in \code{optim}
@@ -2124,7 +2124,7 @@ param_uncertainty_anisotropic<-function(param_est,I_q_cur,B_cur=NA,index_q,
 #' @param len_t number of time steps
 #' @param sigma distance moved per time step
 #'
-#' @return Position matrix with dimension \code{M}\eqn{\times}{%\times}\code{len_t}
+#' @return Position matrix with dimension \code{M x len_t}
 #' by 2 for particle trajectory. The first \code{M} rows being the initial position
 #' \code{pos0}.
 #'
@@ -2158,7 +2158,7 @@ bm_particle_intensity <- function(pos0,M,len_t,sigma){
 #' @param len_t number of time steps
 #' @param sigma distance moved per time step in x,y-directions, a vector of length 2
 #'
-#' @return Position matrix with dimension \code{M}\eqn{\times}{%\times}\code{len_t}
+#' @return Position matrix with dimension \code{M x len_t}
 #' by 2 for particle trajectory. The first \code{M} rows being the initial position
 #' \code{pos0}.
 #'
@@ -2195,7 +2195,7 @@ anisotropic_bm_particle_intensity <- function(pos0,M,len_t,sigma){
 #' @param rho correlation between successive step and previous step,
 #' value between 0 and 1
 #'
-#' @return Position matrix with dimension \code{M}\eqn{\times}{%\times}\code{len_t}
+#' @return Position matrix with dimension \code{M x len_t}
 #' by 2 for particle trajectory. The first \code{M} rows being the initial position
 #' \code{pos0}.
 #'
@@ -2234,7 +2234,7 @@ ou_particle_intensity <- function(pos0,M,len_t,sigma,rho){
 #' @param rho correlation between successive step and previous step in x, y-directions,
 #' a vector of length 2 with values between 0 and 1
 #'
-#' @return Position matrix with dimension \code{M}\eqn{\times}{%\times}\code{len_t}
+#' @return Position matrix with dimension \code{M x len_t}
 #' by 2 for particle trajectory. The first \code{M} rows being the initial position
 #' \code{pos0}.
 #'
@@ -2308,7 +2308,7 @@ corr_fBM <- function(len_t,H){
 #' @param sigma distance moved per time step
 #' @param H Hurst parameter, value between 0 and 1
 #'
-#' @return Position matrix with dimension \code{M}\eqn{\times}{%\times}\code{len_t}
+#' @return Position matrix with dimension \code{M x len_t}
 #' by 2 for particle trajectory. The first \code{M} rows being the initial position
 #' \code{pos0}.
 #'
@@ -2358,7 +2358,7 @@ fbm_particle_intensity <- function(pos0,M,len_t,sigma,H){
 #' @param H Hurst parameter in x, y-directions, a vector of length 2, value
 #' between 0 and 1
 #'
-#' @return Position matrix with dimension \code{M}\eqn{\times}{%\times}\code{len_t}
+#' @return Position matrix with dimension \code{M x len_t}
 #' by 2 for particle trajectory. The first \code{M} rows being the initial position
 #' \code{pos0}.
 #'
@@ -2402,7 +2402,7 @@ anisotropic_fbm_particle_intensity <- function(pos0,M,len_t,sigma,H){
 #' @param rho correlation between successive step and previous step in OU process,
 #' value between 0 and 1
 #'
-#' @return Position matrix with dimension \code{M}\eqn{\times}{%\times}\code{len_t}
+#' @return Position matrix with dimension \code{M x len_t}
 #' by 2 for particle trajectory. The first \code{M} rows being the initial position
 #' \code{pos0}.
 #'
@@ -2488,7 +2488,7 @@ fbm_ou_particle_intensity <- function(pos0,M,len_t,sigma_fbm,sigma_ou,H,rho){
 #' @param rho correlation between successive step and previous step in OU process
 #' in x, y-directions, a vector of length 2 with values between 0 and 1
 #'
-#' @return Position matrix with dimension \code{M}\eqn{\times}{%\times}\code{len_t}
+#' @return Position matrix with dimension \code{M x len_t}
 #' by 2 for particle trajectory. The first \code{M} rows being the initial position
 #' \code{pos0}.
 #'
@@ -2555,14 +2555,14 @@ anisotropic_fbm_ou_particle_intensity <- function(pos0,M,len_t,sigma_fbm,sigma_o
 #' @param sz frame size of simulated square image
 #' @param sigma_p radius of the spherical particle (3sigma_p)
 #'
-#' @return Intensity profile matrix with structure 'T_SS_mat' (matrix with
-#' dimension \code{len_t} by \code{sz}\eqn{\times}{%\times}\code{sz}).
+#' @return Intensity profile matrix with structure "T_SS_mat" (matrix with
+#' dimension \code{len_t} by \code{sz x sz}).
 #' @details
-#' Input \code{I} should has structure 'T_SS_mat', matrix with dimension
-#' \code{len_t} by \code{sz}\eqn{\times}{%\times}\code{sz}.
+#' Input \code{I} should has structure "T_SS_mat", matrix with dimension
+#' \code{len_t} by \code{sz x sz}.
 #'
 #' Input \code{pos} should be the position matrix with dimension
-#' \code{M}\eqn{\times}{%\times}\code{len_t}. See \code{\link{bm_particle_intensity}},
+#' \code{M x len_t}. See \code{\link{bm_particle_intensity}},
 #' \code{\link{ou_particle_intensity}}, \code{\link{fbm_particle_intensity}},
 #' \code{\link{fbm_ou_particle_intensity}}.
 #'
@@ -2615,7 +2615,7 @@ fill_intensity <- function(len_t, M, I, pos, Ic, sz, sigma_p){
 #' @return A vector of numerical MSD for given lag times.
 #' @details
 #' Input \code{pos} should be the position matrix with dimension
-#' \code{M}\eqn{\times}{%\times}\code{len_t}. See \code{\link{bm_particle_intensity}},
+#' \code{M x len_t}. See \code{\link{bm_particle_intensity}},
 #' \code{\link{ou_particle_intensity}}, \code{\link{fbm_particle_intensity}},
 #' \code{\link{fbm_ou_particle_intensity}}.
 #'
@@ -2667,7 +2667,7 @@ numerical_msd <- function(pos, M,len_t){
 #' dimension 2 by \code{len_t}.
 #' @details
 #' Input \code{pos} should be the position matrix with dimension
-#' \code{M}\eqn{\times}{%\times}\code{len_t}. See \code{\link{bm_particle_intensity}},
+#' \code{M x len_t}. See \code{\link{bm_particle_intensity}},
 #' \code{\link{ou_particle_intensity}}, \code{\link{fbm_particle_intensity}},
 #' \code{\link{fbm_ou_particle_intensity}}.
 #'
@@ -2868,6 +2868,21 @@ show.aniso_simulation <- function(object){
 #' Uncertainty quantification and estimation in differential dynamic microscopy.
 #' Physical Review E, 104(3), 034610.
 show.sam <- function(object){
+  if (identical(object@method, "model-free")) {
+    uncertainty_available = !all(is.na(object@msd_lower)) && !all(is.na(object@msd_upper))
+    moduli_available = !all(is.na(object@Gp)) && !all(is.na(object@Gpp))
+    truth_available = !all(is.na(object@msd_truth))
+    
+    cat("Number of q ring: ", object@len_q, "\n")
+    cat("Index of wave number selected: ", object@index_q, "\n")
+    cat("Number of lag times: ", length(object@d_input)-1, "\n")
+    cat("Maximum log likelihood value: ",object@mle, "\n")
+    cat("MSD uncertainty intervals estimated: ", uncertainty_available, "\n", sep = "")
+    cat("Storage/loss moduli estimated: ", moduli_available, "\n", sep = "")
+    cat("True MSD available: ", truth_available, "\n", sep = "")
+    return(invisible(object))
+  }
+
   cat("Fitted model: ",object@model_name, "\n")
   cat("Number of q ring: ",object@len_q, "\n")
   cat("Index of wave number selected: ",object@index_q, "\n")
@@ -2875,7 +2890,7 @@ show.sam <- function(object){
   cat("Estimated parameters in the model: ",object@param_est, "\n")
   cat("True variance of background noise: ",object@sigma_2_0_truth, "\n")
   cat("Estimated variance of background noise: ",object@sigma_2_0_est, "\n")
-  if(object@method=="AIUQ"){
+  if(identical(object@method, "AIUQ")){
     cat("Maximum log likelihood value: ",object@mle, "\n")
     cat("Akaike information criterion score: ",object@AIC, "\n")
   }
@@ -3166,13 +3181,13 @@ plot_MSD<-function(object, msd_truth=NA, title=NA, log10=TRUE){
 #'
 #' @return 2D plot in gray scale (or with color) of selected frame.
 #' @details
-#' By default \code{intensity_str} is set to 'T_SS_mat', a time by space\eqn{\times}{%\times}space
+#' By default \code{intensity_str} is set to "T_SS_mat", a time by space x space
 #' matrix, which is the structure of intensity profile obtained from \code{simulation}
-#' class. For \code{intensity_str='SST_array'} , input intensity profile should be a
+#' class. For \code{intensity_str="SST_array"} , input intensity profile should be a
 #' space by space by time array, which is the structure from loading a tif file.
-#' For \code{intensity_str='S_ST_mat'}, input intensity profile should be a
-#' space by space\eqn{\times}{%\times}time matrix. For \code{intensity_str='SS_T_mat'},
-#' input intensity profile should be a space\eqn{\times}{%\times}space by time matrix.
+#' For \code{intensity_str="S_ST_mat"}, input intensity profile should be a
+#' space by space x time matrix. For \code{intensity_str="SS_T_mat"},
+#' input intensity profile should be a space x space by time matrix.
 #'
 #' @author \packageAuthor{AIUQ}
 #' @examples
@@ -3230,8 +3245,8 @@ plot_intensity<-function(intensity,intensity_str="T_SS_mat",frame=1,sz=NA,
 #' @details
 #' Dynamic image structure function(Dqt) can be obtained from ensemble average
 #' of absolute values squared of Four transformed intensity difference:
-#' \deqn{D(q,\Delta t) = \langle |\Delta \hat{I}(q,t,\Delta t)|^2\rangle}{%D(q,\Delta t) = \langle |\Delta \hat{I}(q,t,\Delta t)|^2\rangle}
-#' See 'References'.
+#' \deqn{D(q, \Delta t) = \langle |\Delta \hat{I}(q, t, \Delta t)|^2 \rangle}{D(q, Delta t) = <|Delta I(q, t, Delta t)|^2>} 
+#' See "References".
 #'
 #' @references
 #' Gu, M., He, Y., Liu, X., & Luo, Y. (2023). Ab initio uncertainty
@@ -3282,8 +3297,8 @@ SAM_Dqt<-function(len_q,index_q,len_t,I_q_matrix,q_ori_ring_loc_unique_index,sz)
 #' @details
 #' Dynamic image structure function(Dqt) can be obtained from ensemble average
 #' of absolute values squared of Four transformed intensity difference:
-#' \deqn{D(q,\Delta t) = \langle |\Delta \hat{I}(q,t,\Delta t)|^2\rangle}{%D(q,\Delta t) = \langle |\Delta \hat{I}(q,t,\Delta t)|^2\rangle}
-#' See 'References'.
+#' \deqn{D(q,\Delta t) = \langle |\Delta \hat{I}(q,t,\Delta t)|^2\rangle} {D(q, Delta t) = <|Delta I(q, t, Delta t)|^2>}
+#' See "References".
 #'
 #' @author \packageAuthor{AIUQ}
 #' @export
@@ -3329,8 +3344,8 @@ l2_fixedAB<-function(param,Dqt_cur,q_cur,A_est_q_cur,B_est,
 #' @details
 #' Dynamic image structure function(Dqt) can be obtained from ensemble average
 #' of absolute values squared of Four transformed intensity difference:
-#' \deqn{D(q,\Delta t) = \langle |\Delta \hat{I}(q,t,\Delta t)|^2\rangle}{%D(q,\Delta t) = \langle |\Delta \hat{I}(q,t,\Delta t)|^2\rangle}
-#' See 'References'.
+#' \deqn{D(q,\Delta t) = \langle |\Delta \hat{I}(q,t,\Delta t)|^2\rangle}{D(q, Delta t) = <|Delta I(q, t, Delta t)|^2>}
+#' See "References".
 #'
 #' @author \packageAuthor{AIUQ}
 #' @export
@@ -3386,8 +3401,8 @@ l2_estAB<-function(param,Dqt_cur,q_cur,d_input,model_name,
 #' @details
 #' Dynamic image structure function(Dqt) can be obtained from ensemble average
 #' of absolute values squared of Four transformed intensity difference:
-#' \deqn{D(q,\Delta t) = \langle |\Delta \hat{I}(q,t,\Delta t)|^2\rangle}{%D(q,\Delta t) = \langle |\Delta \hat{I}(q,t,\Delta t)|^2\rangle}
-#' See 'References'.
+#' \deqn{D(q,\Delta t) = \langle |\Delta \hat{I}(q,t,\Delta t)|^2\rangle}{D(q, Delta t) = <|Delta I(q, t, Delta t)|^2>}
+#' See "References".
 #'
 #' @author \packageAuthor{AIUQ}
 #' @export
@@ -3476,8 +3491,8 @@ theta_est_l2_dqt_fixedAB<-function(param,q,index_q,Dqt,A_est_q,B_est,
 #' @details
 #' Dynamic image structure function(Dqt) can be obtained from ensemble average
 #' of absolute values squared of Four transformed intensity difference:
-#' \deqn{D(q,\Delta t) = \langle |\Delta \hat{I}(q,t,\Delta t)|^2\rangle}{%D(q,\Delta t) = \langle |\Delta \hat{I}(q,t,\Delta t)|^2\rangle}
-#' See 'References'.
+#' \deqn{D(q,\Delta t) = \langle |\Delta \hat{I}(q,t,\Delta t)|^2\rangle}{D(q, Delta t) = <|Delta I(q, t, Delta t)|^2>}
+#' See "References".
 #'
 #' @author \packageAuthor{AIUQ}
 #' @export

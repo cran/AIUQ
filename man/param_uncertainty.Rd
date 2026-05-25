@@ -33,7 +33,7 @@ maximize the log likelihood. This vector will serve as initial values in the
 \item{I_q_cur}{Fourier transformed intensity profile}
 
 \item{B_cur}{current value of B. This parameter is determined by the noise
-in the system. See 'References'.}
+in the system. See "References".}
 
 \item{index_q}{selected index of wave number}
 
@@ -50,10 +50,10 @@ ensemble over time}
 
 \item{q}{wave vector in unit of um^-1}
 
-\item{model_name}{model name for the fitted model, options from ('BM','OU',
-'FBM',OU+FBM','user_defined')}
+\item{model_name}{model name for the fitted model, options are \code{"BM"},
+\code{"OU"}, \code{"FBM"}, \code{"OU+FBM"}, and \code{"user_defined"}.}
 
-\item{estimation_method}{method for constructing 95\% confidence interval,
+\item{estimation_method}{method for constructing 95% confidence interval,
 default is asymptotic}
 
 \item{M}{number of particles}
@@ -70,9 +70,9 @@ A matrix of lower and upper bound for natural logarithm of
 parameters in the fitted model using \code{AIUQ} method in \code{SAM} class
 }
 \description{
-This function construct the lower and upper bound for 95\% confidence interval
+This function constructs the lower and upper bound for 95\% confidence interval
 of estimated parameters for the given model, including parameters contained
-in the intermediate scattering function and background noise. See 'References'.
+in the intermediate scattering function and background noise. See "References".
 }
 \references{
 Gu, M., He, Y., Liu, X., & Luo, Y. (2023). Ab initio uncertainty

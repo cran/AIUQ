@@ -22,16 +22,16 @@ number of pixels contained in each frame equals sz_x by sz_y.}
 
 \item{\code{len_q}}{integer. Number of wave vector.}
 
-\item{\code{q}}{vector. Wave vector in unit of um^-1.}
+\item{\code{q}}{vector. Wave vector in unit of \code{um^-1}.}
 
 \item{\code{d_input}}{vector. Sequence of lag times.}
 
 \item{\code{B_est_ini}}{numeric. Estimation of B. This parameter is determined by the
-noise in the system. See 'References'.}
+noise in the system. See "References".}
 
 \item{\code{A_est_ini}}{vector. Estimation of A(q). Note this parameter is
 determined by the properties of the imaged material and imaging optics.
-See 'References'.}
+See "References".}
 
 \item{\code{I_o_q_2_ori}}{vector. Absolute square of Fourier transformed intensity
 profile, ensemble over time.}
@@ -40,7 +40,7 @@ profile, ensemble over time.}
 values for each q ring.}
 
 \item{\code{model_name}}{character. Fitted model, options from
-('BM','OU','FBM','OU+FBM', 'user_defined').}
+\code{"BM"}, \code{"OU"}, \code{"FBM"}, \code{"OU+FBM"}, and \code{"user_defined"}.}
 
 \item{\code{param_est}}{vector. Estimated parameters contained in MSD.}
 
@@ -69,7 +69,7 @@ simulated data using \code{simulation}.}
 
 \item{\code{ISF}}{matrix. Empirical intermediate scattering function f(q,delta t).}
 
-\item{\code{I_q}}{matrix. Fourier transformed intensity profile with structure 'SS_T_mat'.}
+\item{\code{I_q}}{matrix. Fourier transformed intensity profile with structure \code{"SS_T_mat"}.}
 
 \item{\code{AIC}}{numeric. Akaike information criterion score.}
 
@@ -80,6 +80,16 @@ simulated data using \code{simulation}.}
 \item{\code{modeled_Dqt}}{matrix. Modeled dynamic image structure function D(q,delta t).}
 
 \item{\code{modeled_ISF}}{matrix. Modeled intermediate scattering function f(q,delta t).}
+
+\item{\code{omega}}{vector. Frequencies corresponding to the estimated moduli.}
+
+\item{\code{Gp}}{vector. Estimated storage modulus.}
+
+\item{\code{Gpp}}{vector. Estimated loss modulus.}
+
+\item{\code{theor_Gp}}{vector. Theoretical storage modulus.}
+
+\item{\code{theor_Gpp}}{vector. Theoretical loss modulus.}
 }}
 
 \references{

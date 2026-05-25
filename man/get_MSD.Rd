@@ -25,20 +25,20 @@ Construct estimated mean squared displacement (MSD) for a given stochastic proce
 }
 \details{
 For Brownian Motion, the MSD follows
-\deqn{MSD_{BM}(\Delta t) = \theta_1\Delta t= 4D\Delta t}{\%MSD_{BM}(\Delta t) = \theta_1\Delta t= 4D\Delta t}
+\deqn{MSD_{BM}(\Delta t) = \theta_1\Delta t= 4D\Delta t}{MSD_BM(Delta t) = theta_1 * Delta t = 4 * D * Delta t}
 where \code{D} is the diffusion coefficient.
 
 For Ornstein–Uhlenbeck process,  the MSD follows
-\deqn{MSD_{OU}(\Delta t) = \theta_2(1-\theta_1^{\Delta t})}{\%MSD_{OU}(\Delta t) = \theta_2(1-\theta_1^{\Delta t})}
-where \eqn{\theta_1=\rho}{\%\theta_1=\rho}
+\deqn{MSD_{OU}(\Delta t) = \theta_2(1-\theta_1^{\Delta t})}{MSD_OU(Delta t) = theta_2 * (1 - theta_1^(Delta t))}
+where \eqn{\theta_1=\rho}{theta_1 = rho}
 is the correlation with previous steps.
 
 For fractional Brownian Motion,  the MSD follows
-\deqn{MSD_{FBM}(\Delta t) =\theta_1\Delta t^{\theta_2}}{\%MSD_{FBM}(\Delta t) =\theta_1\Delta t^{\theta_2}}
-where \eqn{\theta_2=2H}{\%\theta_2=2H} with \code{H} is the the Hurst parameter.
+\deqn{MSD_{FBM}(\Delta t) =\theta_1\Delta t^{\theta_2}}{MSD_FBM(Delta t) = theta_1 * Delta t^(theta_2)}
+where \eqn{\theta_2=2H}{theta_2 = 2H} with \code{H} is the the Hurst parameter.
 
 For 'OU+FBM', the MSD follows
-\deqn{MSD_{OU+FBM}(\Delta t) = \theta_2(1-\theta_1^{\Delta t})+\theta_3\Delta t^{\theta_4}}{\%MSD_{OU+FBM}(\Delta t) = \theta_2(1-\theta_1^{\Delta t})+\theta_3\Delta t^{\theta_4}}
+\deqn{MSD_{OU+FBM}(\Delta t) = \theta_2(1-\theta_1^{\Delta t})+\theta_3\Delta t^{\theta_4}}{MSD_OU+FBM(Delta t) = theta_2 * (1 - theta_1^(Delta t)) + theta_3 * Delta t^(theta_4)}
 }
 \examples{
 library(AIUQ)

@@ -49,9 +49,7 @@ and B parameters.
 }
 \details{
 Dynamic image structure function(Dqt) can be obtained from ensemble average
-of absolute values squared of Four transformed intensity difference:
-\deqn{D(q,\Delta t) = \langle |\Delta \hat{I}(q,t,\Delta t)|^2\rangle}{\%D(q,\Delta t) = \langle |\Delta \hat{I}(q,t,\Delta t)|^2\rangle}
-See 'References'.
+of absolute values squared of Four transformed intensity difference. See "References".
 }
 \references{
 Gu, M., He, Y., Liu, X., & Luo, Y. (2023). Ab initio uncertainty

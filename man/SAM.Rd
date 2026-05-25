@@ -31,7 +31,16 @@ SAM(
   output_dqt = FALSE,
   output_isf = FALSE,
   output_modeled_isf = FALSE,
-  output_modeled_dqt = FALSE
+  output_modeled_dqt = FALSE,
+  model_free_estimation = FALSE,
+  substack = FALSE,
+  estimate_moduli = FALSE,
+  MSD_unit = 1,
+  kB = 1.380649 * 10^{
+     -23
+ },
+  Temp = NA,
+  a = NA
 )
 }
 \arguments{
@@ -106,6 +115,28 @@ whether or not to compute modeled intermediate scattering function(ISF).}
 
 \item{output_modeled_dqt}{a logical evaluating to TRUE or FALSE indicating
 whether or not to compute modeled dynamic image structure function(Dqt).}
+
+\item{model_free_estimation}{a logical evaluating to TRUE or FALSE indicating
+whether or not to use the model-free version for MSD estimation.}
+
+\item{substack}{a logical evaluating to TRUE or FALSE indicating whether or not
+to substack the large videos (for example, videos with 2000 frames) for MSD estimation. 
+Only used when \code{model_free_estimation = TRUE}.}
+
+\item{estimate_moduli}{a logical evaluating to TRUE or FALSE indicating whether
+or not to estimate the storage and loss moduli from the fitted mean squared displacement.
+Only used when \code{model_free_estimation = TRUE} and \code{uncertainty = TRUE}.}
+
+\item{MSD_unit}{scaling factor used to convert the estimated MSD to the desired 
+physical unit before modulus estimation. Only used when \code{model_free_estimation = TRUE}.}
+
+\item{kB}{Boltzmann constant used in the generalized Stokes-Einstein relation.
+Only used when \code{model_free_estimation = TRUE}.}
+
+\item{Temp}{absolute temperature used for modulus estimation. Only used when 
+\code{model_free_estimation = TRUE}.}
+
+\item{a}{particle radius used for modulus estimation. Only used when \code{model_free_estimation = TRUE}.}
 }
 \value{
 Returns an S4 object of class \code{SAM}.
@@ -115,41 +146,92 @@ Fast parameter estimation in scattering analysis of microscopy, using either
 AIUQ or DDM method.
 }
 \details{
-For simulated data using \code{simulation} in AIUQ package, \code{intensity}
-will be automatically extracted from \code{simulation} class.
+For simulated data using \code{simulation} in the AIUQ package, \code{intensity}
+will be automatically extracted from the \code{simulation} class.
 
-By default \code{intensity_str} is set to 'T_SS_mat', a time by space\eqn{\times}{\%\times}space
-matrix, which is the structure of intensity profile obtained from \code{simulation}
-class. For \code{intensity_str='SST_array'} , input intensity profile should be a
-space by space by time array, which is the structure from loading a tif file.
-For \code{intensity_str='S_ST_mat'}, input intensity profile should be a
-space by space\eqn{\times}{\%\times}time matrix.
+By default, \code{intensity_str} is set to \code{"T_SS_mat"}, a time-by-space-by-space
+matrix, which is the structure of the intensity profile obtained from the
+\code{simulation} class. For \code{intensity_str = "SST_array"}, the input
+intensity profile should be a space-by-space-by-time array, which is the
+structure obtained from loading a tif file. For
+\code{intensity_str = "S_ST_mat"}, the input intensity profile should be a
+space-by-space-by-time matrix.
 
-By default \code{AIUQ_thr} is set to \code{c(1,1)}, uses information from all
-complete q rings. The first element affects maximum wave number selected,
-and second element controls minimum proportion of wave number selected. By
-setting 1 for the second element, if maximum wave number selected is less
-than the wave number length, then maximum wave number selected is coerced to
-use all wave number unless user defined another index range through \code{index_q_AIUQ}.
+By default, \code{AIUQ_thr} is set to \code{c(1, 1)} and uses information
+from all complete q rings. The first element affects the maximum selected
+wave number, and the second element controls the minimum proportion of wave
+numbers selected. By setting 1 for the second element, if the maximum wave
+number selected is less than the wave number length, then the maximum wave
+number selected is coerced to use all wave numbers unless the user defines
+another index range through \code{index_q_AIUQ}.
 
-If \code{model_name} equals 'user_defined', or NA (will coerced to
-'user_defined'), then \code{msd_fn} and \code{num_param} need to be provided
-for parameter estimation.
+If \code{model_name} equals \code{"user_defined"}, or \code{NA} (which is
+coerced to \code{"user_defined"}), then \code{msd_fn} and \code{num_param}
+need to be provided for parameter estimation.
 
-Number of particles \code{M} is set to 50 or automatically extracted from
-\code{simulation} class for simulated data using \code{simulation} in AIUQ
-package.
+The number of particles \code{M} is set to 50 by default, or automatically
+extracted from the \code{simulation} class for simulated data generated using
+\code{simulation} in the AIUQ package.
 
-By default, using all wave vectors from complete q ring, unless user defined
-index range through \code{index_q_AIUQ} or \code{index_q_DDM}.
+By default, all wave vectors from complete q rings are used unless the user
+defines an index range through \code{index_q_AIUQ} or \code{index_q_DDM}.
 }
 \examples{
 library(AIUQ)
-# Example 1: Estimation for simulated data
+
+# Example 1: Model-dependent estimation for simulated data
 sim_bm = simulation(len_t=100,sz=100,sigma_bm=0.5)
 show(sim_bm)
-sam = SAM(sim_object = sim_bm)
+sam = SAM(sim_object = sim_bm,model_name='BM')
 show(sam)
+plot(log10(sam@d_input), log10(sam@msd_est), type = "l", col = "cyan",
+     xlab = expression(log[10](Delta * t)), ylab = expression(log[10](MSD)))
+lines(log10(sam@d_input), log10(sam@msd_truth),
+      col = "black", type="l")
+
+\dontrun{
+##with uncertainty
+sim_bm = simulation(len_t=100,sz=100,sigma_bm=0.5)
+sam_uq = SAM(sim_object = sim_bm,model_name='BM',uncertainty=TRUE)
+lines(log10(sam_uq@d_input), log10(sam_uq@msd_truth),
+      col = "black", type="l")
+lines(log10(sam@d_input), log10(sam@msd_truth),
+      col = "black", type="l")
+lines(log10(sam_uq@d_input), log10(sam_uq@msd_lower), type = "l", col = "cyan",lty=2)
+lines(log10(sam_uq@d_input), log10(sam_uq@msd_upper), type = "l", col = "cyan",lty=2)
+}
+
+
+# Example 2: Model-free MSD estimation for simulated data
+\dontrun{
+sim_bm = simulation(len_t=200,sz=200,sigma_bm=1)
+sam_mf = SAM(sim_object = sim_bm, model_free_estimation = TRUE,uncertainty=TRUE)
+show(sam_mf)
+plot(log10(sam_mf@d_input), log10(sam_mf@msd_est), type = "l", col = "cyan",
+     xlab = expression(log[10](Delta * t)), ylab = expression(log[10](MSD)),
+     ylim=c(min(log10(sam_mf@msd_lower[-1])), max(log10(sam_mf@msd_upper[-1]))))
+lines(log10(sam_mf@d_input), log10(sam_mf@msd_truth),
+      col = "black", type="l")
+lines(log10(sam_mf@d_input), log10(sam_mf@msd_lower), type = "l", col = "cyan",lty=2)
+lines(log10(sam_mf@d_input), log10(sam_mf@msd_upper), type = "l", col = "cyan",lty=2)
+}
+      
+
+# Example 3: Model-free MSD estimation for real data
+\dontrun{
+sam_mf = SAM(intensity = intensity, intensity_str = "SST_array",
+             mindt = mindt, pxsz = pxsz, model_free_estimation = TRUE)
+}
+
+# Example 4: Model-free MSD estimation with storage and loss moduli
+\dontrun{
+sam_mf_moduli = SAM(intensity = intensity, intensity_str = "SST_array",
+                    mindt = mindt, pxsz = pxsz, model_free_estimation = TRUE,
+                    uncertainty = TRUE, M = 200, estimate_moduli = TRUE,
+                    MSD_unit = 10^{-12}, Temp = 293, a = 250 * 10^{-9})
+plot(log10(sam_mf_moduli@omega), log10(sam_mf_moduli@Gp), type = 'l')
+lines(log10(sam_mf_moduli@omega), log10(sam_mf_moduli@Gpp), type = 'l', col = "red")
+}
 }
 \references{
 Gu, M., He, Y., Liu, X., & Luo, Y. (2023). Ab initio uncertainty

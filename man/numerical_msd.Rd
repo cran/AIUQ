@@ -21,7 +21,7 @@ Compute numerical mean squared displacement(MSD) based on particle trajectory.
 }
 \details{
 Input \code{pos} should be the position matrix with dimension
-\code{M}\eqn{\times}{\%\times}\code{len_t}. See \code{\link{bm_particle_intensity}},
+\code{M x len_t}. See \code{\link{bm_particle_intensity}},
 \code{\link{ou_particle_intensity}}, \code{\link{fbm_particle_intensity}},
 \code{\link{fbm_ou_particle_intensity}}.
 }

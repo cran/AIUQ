@@ -8,13 +8,13 @@
 S4 class for anisotropic 2D particle movement simulation.
 }
 \details{
-\code{intensity} should has structure 'T_SS_mat', matrix with dimension
-\code{len_t} by \code{sz}\eqn{\times}{\%\times}\code{sz}.
+\code{intensity} should has structure \code{"T_SS_mat"}, matrix with dimension
+\code{len_t} by \code{sz x sz}.
 
 \code{pos} should be the position matrix with dimension
-\code{M}\eqn{\times}{\%\times}\code{len_t}. See \code{\link{bm_particle_intensity}},
-\code{\link{ou_particle_intensity}}, \code{\link{fbm_particle_intensity}},
-\code{\link{fbm_ou_particle_intensity}}.
+\code{M x len_t}. See \link{bm_particle_intensity},
+\link{ou_particle_intensity}, \link{fbm_particle_intensity},
+\link{fbm_ou_particle_intensity}.
 }
 \section{Slots}{
 

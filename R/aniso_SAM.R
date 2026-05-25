@@ -43,12 +43,12 @@
 #' For simulated data using \code{aniso_simulation} in AIUQ package, \code{intensity}
 #' will be automatically extracted from \code{aniso_simulation} class.
 #'
-#' By default \code{intensity_str} is set to 'T_SS_mat', a time by space\eqn{\times}{%\times}space
+#' By default \code{intensity_str} is set to \code{"T_SS_mat"}, a time by space x space
 #' matrix, which is the structure of intensity profile obtained from \code{aniso_simulation}
-#' class. For \code{intensity_str='SST_array'} , input intensity profile should be a
+#' class. For \code{intensity_str="SST_array"} , input intensity profile should be a
 #' space by space by time array, which is the structure from loading a tif file.
-#' For \code{intensity_str='S_ST_mat'}, input intensity profile should be a
-#' space by space\eqn{\times}{%\times}time matrix.
+#' For \code{intensity_str="S_ST_mat"}, input intensity profile should be a
+#' space by space x time matrix.
 #'
 #' By default \code{AIUQ_thr} is set to \code{c(1,1)}, uses information from all
 #' complete q rings. The first element affects maximum wave number selected,
@@ -57,8 +57,8 @@
 #' than the wave number length, then maximum wave number selected is coerced to
 #' use all wave number unless user defined another index range through \code{index_q_AIUQ}.
 #'
-#' If \code{model_name} equals 'user_defined', or NA (will coerced to
-#' 'user_defined'), then \code{msd_fn} and \code{num_param} need to be provided
+#' If \code{model_name} equals "user_defined", or NA (will coerced to
+#' "user_defined"), then \code{msd_fn} and \code{num_param} need to be provided
 #' for parameter estimation.
 #'
 #' Number of particles \code{M} is set to 50 or automatically extracted from

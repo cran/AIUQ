@@ -15,9 +15,8 @@ Authors:
 \itemize{
   \item Yue He
   \item Xubo Liu
+  \item Tong Lin
 }
 
 }
-
 \keyword{internal}
-

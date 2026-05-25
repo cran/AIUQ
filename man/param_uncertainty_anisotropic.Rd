@@ -35,7 +35,7 @@ maximize the log likelihood. This vector will serve as initial values in the
 \item{I_q_cur}{Fourier transformed intensity profile}
 
 \item{B_cur}{current value of B. This parameter is determined by the noise
-in the system. See 'References'.}
+in the system. See "References".}
 
 \item{index_q}{selected index of wave number}
 
@@ -58,8 +58,8 @@ ensemble over time}
 
 \item{q2_unique_index}{index for wave vector that give unique frequency in y direction}
 
-\item{model_name}{model name for the fitted model, options from ('BM','OU',
-'FBM',OU+FBM','user_defined')}
+\item{model_name}{model name for the fitted model, options are \code{"BM"},
+\code{"OU"}, \code{"FBM"}, \code{"OU+FBM"}, and \code{"user_defined"}.}
 
 \item{estimation_method}{method for constructing 95\% confidence interval,
 default is asymptotic}
@@ -81,7 +81,7 @@ parameters in the fitted model using \code{AIUQ} method in \code{SAM} class
 This function construct the lower and upper bound for 95\% confidence interval
 of estimated parameters for the given anisotropic model, including parameters
 contained in the intermediate scattering function and background noise.
-See 'References'.
+See "References".
 }
 \references{
 Gu, M., He, Y., Liu, X., & Luo, Y. (2023). Ab initio uncertainty

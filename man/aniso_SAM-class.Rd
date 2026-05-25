@@ -11,7 +11,7 @@ for anisotropic processes, using either \code{AIUQ} or \code{DDM} method.
 \section{Slots}{
 
 \describe{
-\item{\code{pxsz}}{numeric.  Size of one pixel in unit of micron with default value 1.}
+\item{\code{pxsz}}{numeric. Size of one pixel in unit of micron with default value 1.}
 
 \item{\code{mindt}}{numeric. Minimum lag time with default value 1.}
 
@@ -27,11 +27,11 @@ number of pixels contained in each frame equals sz_x by sz_y.}
 \item{\code{d_input}}{vector. Sequence of lag times.}
 
 \item{\code{B_est_ini}}{numeric. Estimation of B. This parameter is determined by the
-noise in the system. See 'References'.}
+noise in the system. See "References".}
 
 \item{\code{A_est_ini}}{vector. Estimation of A(q). Note this parameter is
 determined by the properties of the imaged material and imaging optics.
-See 'References'.}
+See "References".}
 
 \item{\code{I_o_q_2_ori}}{vector. Absolute square of Fourier transformed intensity
 profile, ensemble over time.}
@@ -40,7 +40,7 @@ profile, ensemble over time.}
 values for each q ring.}
 
 \item{\code{model_name}}{character. Fitted model, options from
-('BM','OU','FBM','OU+FBM', 'user_defined').}
+\code{"BM"}, \code{"OU"}, \code{"FBM"}, \code{"OU+FBM"}, and \code{"user_defined"}.}
 
 \item{\code{param_est}}{matrix. Estimated parameters contained in MSD.}
 
@@ -61,7 +61,7 @@ simulated data using \code{aniso_simulation}.}
 
 \item{\code{index_q}}{vector. Selected index of wave vector.}
 
-\item{\code{I_q}}{matrix. Fourier transformed intensity profile with structure 'SS_T_mat'.}
+\item{\code{I_q}}{matrix. Fourier transformed intensity profile with structure \code{"SS_T_mat"}.}
 
 \item{\code{AIC}}{numeric. Akaike information criterion score.}
 

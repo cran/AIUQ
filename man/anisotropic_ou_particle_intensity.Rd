@@ -19,7 +19,7 @@ anisotropic_ou_particle_intensity(pos0, M, len_t, sigma, rho)
 a vector of length 2 with values between 0 and 1}
 }
 \value{
-Position matrix with dimension \code{M}\eqn{\times}{\%\times}\code{len_t}
+Position matrix with dimension \code{M x len_t}
 by 2 for particle trajectory. The first \code{M} rows being the initial position
 \code{pos0}.
 }

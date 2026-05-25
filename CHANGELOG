@@ -1,3 +1,6 @@
+##change / AIUQ 0.5.4
+ * Add model-free estimation in the SAM function and add examples in SAM
+
 ##change / AIUQ 0.5.3
  * change the output issue of the method 'DDM_fixedAB'
  * add argument A_neg for DDM methods that controls modification for negative A(q)
@@ -10,5 +13,6 @@
  * add argument A_neg in SAM class that controls modification for negative A(q), options from  ('abs','zero'), with absolute value as the default value
  * output estimated A(q) and B using AIUQ method
  * change the formal of arXiv to include doi
+
 ##change / AIUQ 0.5.1
  * implement simulation and estimation of the anisotropic process through aniso_simulation() and aniso_SAM()
